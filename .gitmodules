@@ -1,0 +1,9 @@
+[submodule "firmware/obmq"]
+	path = firmware/obmq
+	url = https://github.com/dpiegdon/obmq.git
+[submodule "hardware"]
+	path = hardware
+	url = https://github.com/leaflabs/maplemini.git
+[submodule "firmware/ChibiOS-RT"]
+	path = firmware/ChibiOS-RT
+	url = https://github.com/ChibiOS/ChibiOS-RT
