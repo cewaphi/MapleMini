@@ -1028,17 +1028,33 @@ static void adc_bad_callback(ADCDriver *adcp, adcerror_t err)
 }
 
 static ADCConversionGroup adcgrpcfg = {
-	FALSE,					// not circular
-	1,					// number of conversion channels
-	NULL,					// ADC conversion end callback
-	adc_bad_callback,			// ADC conversion error callback
-	0,					// CR1
-	0,					// CR2
-	ADC_SMPR1_SMP_AN10(ADC_SAMPLE_1P5),	// SMPR1 samplerate CH10..17
-	ADC_SMPR1_SMP_AN10(ADC_SAMPLE_1P5),	// SMPR2 samplerate CH0..9
-	ADC_SQR1_NUM_CH(1),			// SQR1 conversion group 13..16+len
-	0,					// SQR2 conversion group 7..12
-	0					// SQR3 conversion group 1..6
+  FALSE,                              // not circular
+  1,                                  // number of conversion channels
+  NULL,                               // ADC conversion end callback
+  adc_bad_callback,                   // ADC conversion error callback
+  0,                                  // CR1
+  0,                                  // CR2
+  ADC_SMPR1_SMP_AN10(ADC_SAMPLE_1P5)| // set all channels to 1.5 cycle timings
+  ADC_SMPR1_SMP_AN11(ADC_SAMPLE_1P5)|
+  ADC_SMPR1_SMP_AN12(ADC_SAMPLE_1P5)|
+  ADC_SMPR1_SMP_AN13(ADC_SAMPLE_1P5)|
+  ADC_SMPR1_SMP_AN14(ADC_SAMPLE_1P5)|
+  ADC_SMPR1_SMP_AN15(ADC_SAMPLE_1P5)|
+  ADC_SMPR1_SMP_SENSOR(ADC_SAMPLE_1P5)|
+  ADC_SMPR1_SMP_VREF(ADC_SAMPLE_1P5), // SMPR1
+  ADC_SMPR2_SMP_AN0(ADC_SAMPLE_1P5)|
+  ADC_SMPR2_SMP_AN1(ADC_SAMPLE_1P5)|
+  ADC_SMPR2_SMP_AN2(ADC_SAMPLE_1P5)|
+  ADC_SMPR2_SMP_AN3(ADC_SAMPLE_1P5)|
+  ADC_SMPR2_SMP_AN4(ADC_SAMPLE_1P5)|
+  ADC_SMPR2_SMP_AN5(ADC_SAMPLE_1P5)|
+  ADC_SMPR2_SMP_AN6(ADC_SAMPLE_1P5)|
+  ADC_SMPR2_SMP_AN7(ADC_SAMPLE_1P5)|
+  ADC_SMPR2_SMP_AN8(ADC_SAMPLE_1P5)|
+  ADC_SMPR2_SMP_AN9(ADC_SAMPLE_1P5),  // SMPR2
+  ADC_SQR1_NUM_CH(1),                 // SQR1 conversion group 13..16+len
+  0,                                  // SQR2 conversion group 7..12
+  0                                   // SQR3 conversion group 1..6
 };
 
 static void cmd_adc(BaseSequentialStream *chp, int argc, char *argv[]) {
