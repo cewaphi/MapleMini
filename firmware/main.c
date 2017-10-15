@@ -1145,7 +1145,7 @@ static const ShellConfig shell_cfg1 = {
 /*
  * Application entry point.
  */
-int __attribute__((noreturn)) main(void) {
+int main(void) {
 	thread_t *shelltp = NULL;
 	unsigned int i;
 
