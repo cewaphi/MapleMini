@@ -531,6 +531,81 @@ exit_with_usage:
 
 
 
+/* Function for the rotary table/turntable */
+
+static void cmd_rt(BaseSequentialStream *chp, int argc, char *argv[]){
+        uint8_t i,u,pin2use,direction;
+        char *dOpt = NULL, *pOpt = NULL;
+
+
+        // Parsing
+        for(i = 0; i < argc; i++) {
+                if(strcmp(argv[i], "-d") == 0) {
+                        if(++i >= argc) continue;
+                        dOpt = argv[i];  // Sets the direction bit
+                }
+                else if(strcmp(argv[i], "-p") == 0) {
+                        if(++i >= argc) continue;
+                        pOpt = argv[i];  // Sets the number of pulses 
+                }
+        }
+
+        if (!dOpt || !pOpt)
+                goto exit_with_usage;
+
+
+
+        for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+                if((pinPorts[i].as_gpio) && (strcmp("25", pinPorts[i].pinNrString) == 0)) { // Use physical pin 25
+                        if(strcmp("out", "out") == 0) {
+                                palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+				pin2use=i;  // variable to store the pin where the pulse train will be generated
+                                /*if(strcmp("1", "1") == 0) {
+                                        palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
+
+				}*/
+			}	
+		}
+	}
+
+	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+                if((pinPorts[i].as_gpio) && (strcmp("21", pinPorts[i].pinNrString) == 0)) { //Use physical pin 21
+                        if(strcmp("out", "out") == 0) {
+                                palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+                                if(strcmp(dOpt, "1") == 0) { //if dOpt is "1", set the rotation direction to CW
+                                        palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
+					direction=i;
+                                }
+                        }
+                }
+        }
+
+
+	chprintf(chp, "Pin to use: %d and pinPorts size of: %d \r\n",pin2use,i);
+
+	for (u = 0; u < atoi(pOpt); u++ ){	// Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
+		palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
+		//chprintf(chp, "Iteration %d \r\n",u);
+		chThdSleepMilliseconds(2);	// Both Sleep periods should be the same in order to obtain an square function
+		palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
+		chThdSleepMilliseconds(2);
+
+	}
+        chprintf(chp, "Sent %d Pulses %d direction \r\n", atoi(pOpt), (int)(atof(dOpt)));
+	if(strcmp(dOpt, "1") == 0) {	// Just clear the pin if it has been set beforehand !!
+		palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);		// Clear the direction pin before leaving the function
+	}
+
+	return;
+
+exit_with_usage:
+        chprintf(chp, "Usage: rt -p [Pulses] -d [direction]\r\n"
+                                "\tNumber of pulses to turn (1 pulse = 1,8 degrees)\r\n"
+                                "\tDirection: 0 (CW) - 1 (CCW)\r\n");
+
+}
+
+
 
 
 /* Decoder functions for different sensors */
@@ -1146,6 +1221,7 @@ static const ShellCommand commands[] = {
 	{"uniqueid", cmd_uniqueid},
 	{"adc", cmd_adc},
 	{"reset", cmd_reset},
+	{"rt",cmd_rt},
 	{NULL, NULL}
 };
 
