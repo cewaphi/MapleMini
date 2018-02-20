@@ -560,10 +560,6 @@ static void cmd_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                         if(strcmp("out", "out") == 0) {
                                 palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
 				pin2use=i;  // variable to store the pin where the pulse train will be generated
-                                /*if(strcmp("1", "1") == 0) {
-                                        palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
-
-				}*/
 			}	
 		}
 	}
@@ -585,7 +581,6 @@ static void cmd_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 
 	for (u = 0; u < atoi(pOpt); u++ ){	// Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
 		palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
-		//chprintf(chp, "Iteration %d \r\n",u);
 		chThdSleepMilliseconds(2);	// Both Sleep periods should be the same in order to obtain an square function
 		palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
 		chThdSleepMilliseconds(2);
@@ -642,12 +637,11 @@ static void cmd_mode(BaseSequentialStream *chp, int argc, char *argv[]){
         }
 
 
-	chprintf(chp, "values pOpt1: %d pOpt2: %d \r\n",pOpt1,pOpt2);
 	palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin); // Reset both pins as its default state is high
 	palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
 
 	switch (atoi(mOpt)){
-		case 1: // Reset pins 30 and 31
+		case 1: // Reset pins 30 and 31 // By reseting the pins before the switch, the mode 1 is selected by default
 			chprintf(chp, "Mode 1 selected \r\n");
 
 			if (out1){
@@ -697,7 +691,7 @@ static void cmd_mode(BaseSequentialStream *chp, int argc, char *argv[]){
 
 
 	}
-	chprintf(chp, "End of the function \r\n");
+	chprintf(chp, "Mode 1 selected by default \r\n");
 	return;
 
 exit_with_usage:
