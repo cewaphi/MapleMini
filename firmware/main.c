@@ -534,7 +534,7 @@ exit_with_usage:
 /* Function for the rotary table/turntable */
 
 static void cmd_rt(BaseSequentialStream *chp, int argc, char *argv[]){
-        uint8_t i,u,pin2use,direction;
+        uint8_t i,u,pin2use,direction,gear_reduction; //gear reduction
         char *dOpt = NULL, *pOpt = NULL;
 
 
@@ -592,7 +592,7 @@ static void cmd_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 
 	}
         chprintf(chp, "Sent %d Pulses %d direction \r\n", atoi(pOpt), (int)(atof(dOpt)));
-	if(strcmp(dOpt, "1") == 0) {	// Just clear the pin if it has been set beforehand !!
+	if(strcmp(dOpt, "1") == 0) {	// Just clear the pin if it has been set beforehand 
 		palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);		// Clear the direction pin before leaving the function
 	}
 
