@@ -684,14 +684,14 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 	return;
 
 exit_with_usage:
-        chprintf(chp, "Usage: motor_rt -p [Pulses] -d [direction] -m [operation mode]\r\n"
+        chprintf(chp, "Usage: motor_rt -m <operation mode> -p [Pulses] -d [direction] -s [start/enable]\r\n"
                                 "\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,0375 degrees the rotary table)\r\n"
                                 "\tDirection: 0 (CW) - 1 (CCW)\r\n"  
 				"\tOperation modes:  \r\n"
-				"\t 1 - Clock mode, turn left \r\n"
-                                "\t 2 - Clock mode, turn right \r\n"
-                                "\t 3 - Turn 45 degree right \r\n"
-                                "\t 4 - Ref. run with external sensor (Homing) \r\n");
+				"\t 1 - Clock mode, turn left --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
+                                "\t 2 - Clock mode, turn right --> [require -p (number of pulses) and -d (direction of rotation)]  \r\n"
+                                "\t 3 - Turn 45 degree right --> [require -s (start/enable)] \r\n"
+                                "\t 4 - Ref. run with external sensor (Homing) --> [require -s (start/enable)]  \r\n");
 
 }
 
