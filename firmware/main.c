@@ -533,8 +533,8 @@ exit_with_usage:
 
 /* Function for the rotary table/turntable */
 
-static void cmd_rt(BaseSequentialStream *chp, int argc, char *argv[]){
-        uint8_t i,u,pin2use,direction,gear_reduction; //gear reduction
+static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
+        uint8_t i,u,pin2use,direction,gear_reduction=48,num_pulses; //RL-D-50 has a gear reduction of 1:48
         char *dOpt = NULL, *pOpt = NULL;
 
 
@@ -576,10 +576,11 @@ static void cmd_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                 }
         }
 
+	num_pulses = atoi(pOpt) * gear_reduction; // Gets the right number of pulses to be done according to the gear reduction
 
-	chprintf(chp, "Pin to use: %d and pinPorts size of: %d \r\n",pin2use,i);
+	chprintf(chp, "Pin to use: %d pinPorts size of: %d and number of pulses to produce %d \r\n",pin2use,i,pOpt);
 
-	for (u = 0; u < atoi(pOpt); u++ ){	// Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
+	for (u = 0; u < num_pulses; u++ ){	// Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
 		palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
 		chThdSleepMilliseconds(2);	// Both Sleep periods should be the same in order to obtain an square function
 		palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
@@ -595,7 +596,7 @@ static void cmd_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 
 exit_with_usage:
         chprintf(chp, "Usage: rt -p [Pulses] -d [direction]\r\n"
-                                "\tNumber of pulses to turn (1 pulse = 1,8 degrees)\r\n"
+                                "\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,0375 degrees the rotary table)\r\n"
                                 "\tDirection: 0 (CW) - 1 (CCW)\r\n");
 
 }
@@ -603,7 +604,7 @@ exit_with_usage:
 
 /* Function to select the operation mode */
 
-static void cmd_mode(BaseSequentialStream *chp, int argc, char *argv[]){
+static void cmd_motor_mode(BaseSequentialStream *chp, int argc, char *argv[]){
         uint8_t i, pOpt1, pOpt2; // Initialize the pins to be used
 
         char *mOpt = NULL; //,*pOpt1 = NULL, *pOpt2 = NULL;
@@ -1318,8 +1319,8 @@ static const ShellCommand commands[] = {
 	{"uniqueid", cmd_uniqueid},
 	{"adc", cmd_adc},
 	{"reset", cmd_reset},
-	{"rt",cmd_rt},
-	{"mode",cmd_mode},
+	{"motor_rt",cmd_motor_rt},
+	{"motor_mode",cmd_motor_mode},
 	{NULL, NULL}
 };
 
