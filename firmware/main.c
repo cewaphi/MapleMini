@@ -567,21 +567,17 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 	
         for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
                 if((pinPorts[i].as_gpio) && (strcmp("25", pinPorts[i].pinNrString) == 0)) { // Use physical pin 25
-                        if(strcmp("out", "out") == 0) {
-                                palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-				pin2use=i;  // variable to store the pin where the pulse train will be generated
-			}	
+                	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+			pin2use=i;  // variable to store the pin where the pulse train will be generated
 		}
 	}
 
 	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
                 if((pinPorts[i].as_gpio) && (strcmp("21", pinPorts[i].pinNrString) == 0)) { //Use physical pin 21
-                        if(strcmp("out", "out") == 0) {
-                                palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                                if(strcmp(dOpt, "1") == 0) { //if dOpt is "1", set the rotation direction to CW
-                                        palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
-					direction=i;
-                                }
+                	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+                        if(strcmp(dOpt, "1") == 0) { //if dOpt is "1", set the rotation direction to CW
+                        	palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
+				direction=i;
                         }
                 }
         }
