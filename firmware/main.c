@@ -534,8 +534,8 @@ exit_with_usage:
 /* Function for the rotary table/turntable */
 
 static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
-        uint8_t i,u,pin2use,direction,gear_reduction=48,num_pulses,pOpt1, pOpt2; // Initialize the pins to be used //RL-D-50 has a gear reduction of 1:48
-        char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL;
+        uint8_t i,u,pin2use,direction,start,gear_reduction=48,num_pulses,pOpt1, pOpt2; // Initialize the pins to be used //RL-D-50 has a gear reduction of 1:48
+        char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL, *sOpt = NULL;
 	bool out1 = false, out2 = false; // Variables to store the state of the outputs
 
         // Parsing
@@ -552,7 +552,10 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                         if(++i >= argc) continue;
                         mOpt = argv[i];  // Selects the operation mode
                 }
-
+		else if(strcmp(argv[i], "-s") == 0) {
+                        if(++i >= argc) continue;
+                        sOpt = argv[i];  // Sets the start/enable bit
+                }
         }
 
         if (!mOpt
@@ -582,6 +585,15 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                 }
         }
 
+	/* Pin defition for the start/enable signal*/
+
+	 for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+                if((pinPorts[i].as_gpio) && (strcmp("29", pinPorts[i].pinNrString) == 0)) { //Use physical pin 21
+                	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+                        start=i;
+                }
+        }
+
 	/* Pin definition to select the operation modes*/
 
         for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
@@ -600,7 +612,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 
         palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin); // Reset both pins that select the operation mode as its default state is high
         palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-
+	palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
 
 	num_pulses = atoi(pOpt) * gear_reduction; // Gets the right number of pulses to be done according to the gear reduction
 	
