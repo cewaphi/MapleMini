@@ -578,7 +578,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 
 	num_pulses = atoi(pOpt) * gear_reduction; // Gets the right number of pulses to be done according to the gear reduction
 
-	chprintf(chp, "Pin to use: %d pinPorts size of: %d and number of pulses to produce %d \r\n",pin2use,i,pOpt);
+	chprintf(chp, "Pin to use: %d pinPorts size of: %d and number of pulses to produce %d \r\n",pin2use,i,num_pulses);
 
 	for (u = 0; u < num_pulses; u++ ){	// Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
 		palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
