@@ -675,6 +675,14 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                         out1 = true;
                         palSetPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
                         out2 = true;
+			palSetPad(pinPorts[start].gpio, pinPorts[start].pin);
+			out3 = true;
+			chThdSleepMilliseconds(20); // In order to have enough time to have a pulse for the start/enable signal
+                        if (out3){
+                                palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
+                                start=false;
+                                chprintf(chp, "Pin 29 (Start) cleared! \r\n");
+			}
                 break;
                 default: chprintf(chp, "Select one of the available modes \r\n");
 
