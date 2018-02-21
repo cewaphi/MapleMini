@@ -555,8 +555,13 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 
         }
 
-        if (!dOpt || !pOpt || !mOpt)
-                goto exit_with_usage;
+        if (!mOpt
+		|| ((strcmp(mOpt, "1") == 0) && (!pOpt || !dOpt))
+		|| ((strcmp(mOpt, "2") == 0) && (!pOpt || !dOpt)) 
+		|| ((strcmp(mOpt, "3") == 0) && !sOpt)
+		|| ((strcmp(mOpt, "4") == 0) && !sOpt)
+|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0) || (strcmp(mOpt, "3") == 0) || (strcmp(mOpt, "4") == 0))
+	)goto exit_with_usage;
 
 	/* Pin definition for the pulse and direction outputs*/
 	
