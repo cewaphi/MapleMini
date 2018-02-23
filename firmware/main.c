@@ -534,9 +534,10 @@ exit_with_usage:
 /* Function for the rotary table/turntable */
 
 static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
-        uint8_t i,u,pin2use,direction,start,gear_reduction=48,num_pulses,pOpt1, pOpt2; // Initialize the pins to be used //RL-D-50 has a gear reduction of 1:48
-        char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL, *sOpt = NULL;
-	bool out1 = false, out2 = false; // Variables to store the state of the outputs
+        uint8_t i,pin2use,direction,start,gear_reduction=48,pOpt1, pOpt2; // Initialize the pins to be used //RL-D-50 has a gear reduction of 1:48
+	uint16_t num_pulses,u; // Unsigned short (0-65535)
+        char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL; // *sOpt = NULL;
+	bool out1 = false, out2 = false, out3 = false; // Variables to store the state of the outputs
 
         // Parsing
         for(i = 0; i < argc; i++) {
@@ -655,6 +656,22 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                                 palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
                                 out2=false;
                         }
+
+	                chprintf(chp, "Pin to use: %d pinPorts size of: %d and number of pulses to produce %d \r\n",pin2use,i,num_pulses);
+                        chThdSleepMilliseconds(500); // In order to have enough time to have a pulse for the start/enable signal
+
+                        for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
+                                palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
+                                chThdSleepMilliseconds(2);      // Both Sleep periods should be the same in order to obtain an square function
+                                palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
+                                chThdSleepMilliseconds(2);
+                        }
+                        chprintf(chp, "Sent %d Pulses %d direction \r\n", atoi(pOpt), (int)(atof(dOpt)));
+                        if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand 
+                                palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
+                        }
+                        chprintf(chp, "====== The direction bit value is :  %d ======== \r\n", atoi(dOpt));
+
                 break;
 
                 case 3: // Set pin 31 only
