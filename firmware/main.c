@@ -553,17 +553,17 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                         if(++i >= argc) continue;
                         mOpt = argv[i];  // Selects the operation mode
                 }
-		else if(strcmp(argv[i], "-s") == 0) {
+	/*	else if(strcmp(argv[i], "-s") == 0) {
                         if(++i >= argc) continue;
                         sOpt = argv[i];  // Sets the start/enable bit
-                }
+                }*/
         }
 
         if (!mOpt
 		|| ((strcmp(mOpt, "1") == 0) && (!pOpt || !dOpt))
 		|| ((strcmp(mOpt, "2") == 0) && (!pOpt || !dOpt)) 
-		|| ((strcmp(mOpt, "3") == 0) && !sOpt)
-		|| ((strcmp(mOpt, "4") == 0) && !sOpt)
+		/*|| ((strcmp(mOpt, "3") == 0) && !sOpt)*/
+		/*|| ((strcmp(mOpt, "4") == 0) && !sOpt)*/
 || !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0) || (strcmp(mOpt, "3") == 0) || (strcmp(mOpt, "4") == 0))
 	)goto exit_with_usage;
 
@@ -709,14 +709,14 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 	return;
 
 exit_with_usage:
-        chprintf(chp, "Usage: motor_rt -m <operation mode> -p [Pulses] -d [direction] -s [start/enable]\r\n"
+        chprintf(chp, "Usage: motor_rt -m <operation mode> -p [Pulses] -d [direction] \r\n"
                                 "\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,0375 degrees the rotary table)\r\n"
                                 "\tDirection: 0 (CW) - 1 (CCW)\r\n"  
 				"\tOperation modes:  \r\n"
 				"\t 1 - Clock mode, turn left --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
                                 "\t 2 - Clock mode, turn right --> [require -p (number of pulses) and -d (direction of rotation)]  \r\n"
-                                "\t 3 - Turn 45 degree right --> [require -s (start/enable)] \r\n"
-                                "\t 4 - Ref. run with external sensor (Homing) --> [require -s (start/enable)]  \r\n");
+                                "\t 3 - Turn 45 degree right \r\n"
+                                "\t 4 - Ref. run with external sensor (Homing) \r\n");
 
 }
 
