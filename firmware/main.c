@@ -633,6 +633,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                         }
 			
 			chprintf(chp, "Pin to use: %d pinPorts size of: %d and number of pulses to produce %d \r\n",pin2use,i,num_pulses);
+			chThdSleepMilliseconds(200); // In order to have enough time to have a pulse for the start/enable signal
 
 		        for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
                 		palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
