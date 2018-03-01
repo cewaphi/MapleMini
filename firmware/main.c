@@ -611,7 +611,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
         }
 
 
-        palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin); // Reset both pins that select the operation mode as its default state is high
+        palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin); // Reset pins as its default state is high
         palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
 	palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
 
@@ -645,6 +645,8 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 		        if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand 
                 		palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
         		}
+			chprintf(chp, "====== The direction bit value is :  %d ======== \r\n", atoi(dOpt));
+
 
                 break;
 
@@ -684,6 +686,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                         }
                         palSetPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
                         out2 = true;
+
                         palSetPad(pinPorts[start].gpio, pinPorts[start].pin);
                         out3 = true;
                         chThdSleepMilliseconds(200); // In order to have enough time to have a pulse for the start/enable signal
@@ -692,6 +695,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                                 start=false;
                                 chprintf(chp, "Pin 29 (Start) cleared! \r\n");
                         }
+
                 break;
 
                 case 4: // Set pins 30 and 31
@@ -709,11 +713,16 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                                 start=false;
                                 chprintf(chp, "Pin 29 (Start) cleared! \r\n");
 			}
+			
                 break;
                 default: chprintf(chp, "Select one of the available modes \r\n");
 
 
         }
+//	palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin); // Reset pins as its default state is high
+//        palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
+//        palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
+//	palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);
         chprintf(chp, "Mode 1 selected by default \r\n");
 	return;
 
