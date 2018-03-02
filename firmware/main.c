@@ -63,7 +63,7 @@ struct pinPort pinPorts[] = {
 	{false, true,  "5",      6,  GPIOA,    ADC_CHANNEL_IN6},  // TBD
 	{false, true,  "6",      5,  GPIOA,    ADC_CHANNEL_IN5},  // TBD
 	{false, true,  "7",      4,  GPIOA,    ADC_CHANNEL_IN4},  // TBD
-	{false, true,  "8",      3,  GPIOA,    ADC_CHANNEL_IN3},  // TBD
+	{false, true,  "8",      3,  GPIOA,    ADC_CHANNEL_IN3},  // works    
 	{false, true,  "9",      2,  GPIOA,    ADC_CHANNEL_IN2},  // TBD
 	{true, false, "12",     15,  GPIOC,    ADC_CHANNEL_NONE}, // works
 	{true, false, "13",     14,  GPIOC,    ADC_CHANNEL_NONE}, // works
