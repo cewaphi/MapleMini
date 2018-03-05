@@ -609,7 +609,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
         palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
 	palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
 
-	num_pulses = atoi(pOpt) * gear_reduction * 2; // Gets the right number of pulses to be done according to the gear reduction, multiplied by 2
+	num_pulses = atoi(pOpt) * gear_reduction; // Gets the right number of pulses to be done according to the gear reduction
 	
         switch (atoi(mOpt)){
                 case 1: // Reset pins 30 and 31 // By reseting the pins before the switch, the mode 1 is selected by default
