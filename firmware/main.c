@@ -553,18 +553,12 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                         if(++i >= argc) continue;
                         mOpt = argv[i];  // Selects the operation mode
                 }
-	/*	else if(strcmp(argv[i], "-s") == 0) {
-                        if(++i >= argc) continue;
-                        sOpt = argv[i];  // Sets the start/enable bit
-                }*/
         }
 
         if (!mOpt
 		|| ((strcmp(mOpt, "1") == 0) && (!pOpt || !dOpt))
 		|| ((strcmp(mOpt, "2") == 0) && (!pOpt || !dOpt)) 
-		/*|| ((strcmp(mOpt, "3") == 0) && !sOpt)*/
-		/*|| ((strcmp(mOpt, "4") == 0) && !sOpt)*/
-|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0) || (strcmp(mOpt, "3") == 0) || (strcmp(mOpt, "4") == 0))
+		|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0) || (strcmp(mOpt, "3") == 0) || (strcmp(mOpt, "4") == 0))
 	)goto exit_with_usage;
 
 	/* Pin definition for the pulse and direction outputs*/
@@ -645,8 +639,6 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 		        if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand 
                 		palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
         		}
-			chprintf(chp, "====== The direction bit value is :  %d ======== \r\n", atoi(dOpt));
-
 
                 break;
 
@@ -673,7 +665,6 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                         if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand 
                                 palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
                         }
-                        chprintf(chp, "====== The direction bit value is :  %d ======== \r\n", atoi(dOpt));
 
                 break;
 
@@ -693,7 +684,6 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                         if (out3){
                                 palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
                                 start=false;
-                                chprintf(chp, "Pin 29 (Start) cleared! \r\n");
                         }
 
                 break;
@@ -711,7 +701,6 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                         if (out3){
                                 palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
                                 start=false;
-                                chprintf(chp, "Pin 29 (Start) cleared! \r\n");
 			}
 			
                 break;
@@ -719,10 +708,6 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 
 
         }
-//	palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin); // Reset pins as its default state is high
-//        palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-//        palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
-//	palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);
         chprintf(chp, "Mode 1 selected by default \r\n");
 	return;
 
