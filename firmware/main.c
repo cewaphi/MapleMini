@@ -724,110 +724,6 @@ exit_with_usage:
 }
 
 
-/* Function to select the operation mode */
-
-static void cmd_motor_mode(BaseSequentialStream *chp, int argc, char *argv[]){
-        uint8_t i, pOpt1, pOpt2; // Initialize the pins to be used
-
-        char *mOpt = NULL; //,*pOpt1 = NULL, *pOpt2 = NULL;
-	//pOpt1="30", pOpt2="31"; // Initialize the pins to be used
-	bool out1 = false, out2 = false; // Variables to store the state of the outputs
-
-        // Parsing
-        for(i = 0; i < argc; i++) {
-                if(strcmp(argv[i], "-m") == 0) {
-                        if(++i >= argc) continue;
-                        mOpt = argv[i];  // Selects the operation mode
-                }
-        }
-
-        if (!mOpt)
-                goto exit_with_usage;
-
-	/* Body of the function*/
-
-	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-        	if((pinPorts[i].as_gpio) && (strcmp("30", pinPorts[i].pinNrString) == 0)) { //Use physical pin 30
-			pOpt1 = i;
-                	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                }
-       	}
-       	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-        	if((pinPorts[i].as_gpio) && (strcmp("31", pinPorts[i].pinNrString) == 0)) { //Use physical pin 31
-			pOpt2 = i;
-                	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                }
-        }
-
-
-	palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin); // Reset both pins as its default state is high
-	palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-
-	switch (atoi(mOpt)){
-		case 1: // Reset pins 30 and 31 // By reseting the pins before the switch, the mode 1 is selected by default
-			chprintf(chp, "Mode 1 selected \r\n");
-
-			if (out1){
-				palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
-				out1=false;
-				chprintf(chp, "Pin 30 cleared \r\n");
-			}
-			if (out2){
-				palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-				out2=false;
-				chprintf(chp, "Pin 31 cleared \r\n");
-
-			}
-		break;
-
-		case 2: // Set pin 30 only
-			chprintf(chp, "Mode 2 selected \r\n");
-
-                        palSetPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
-			out1 = true;
-                        if (out2 == true){
-                                palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-				out2=false;
-                        }
-		break;
-
-		case 3: // Set pin 31 only
-			chprintf(chp, "Mode 3 selected \r\n");
-
-			if (out1 == true){
-                                palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
-				out1=false;
-                        }
-                        palSetPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-			out2 = true;
-		break;
-
-		case 4: // Set pins 30 and 31
-			chprintf(chp, "Mode 4 selected \r\n");
-
-                        palSetPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
-			out1 = true;
-                        palSetPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-			out2 = true;
-		break;
-		default: chprintf(chp, "Select one of the available modes \r\n");
-
-
-	}
-	chprintf(chp, "Mode 1 selected by default \r\n");
-	return;
-
-exit_with_usage:
-        chprintf(chp, "Usage: mode -m [Mode] \r\n"
-                                "\t 1 - Clock mode, turn left \r\n"
-                                "\t 2 - Clock mode, turn right \r\n"
-				"\t 3 - Turn 45 degree right \r\n"
-                                "\t 4 - Ref. run with external sensor (Homing) \r\n");
-
-
-
-}
-
 /* Function for the Linear unit */
 
 static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
@@ -1584,7 +1480,6 @@ static const ShellCommand commands[] = {
 	{"adc", cmd_adc},
 	{"reset", cmd_reset},
 	{"motor_rt",cmd_motor_rt},
-	{"motor_mode",cmd_motor_mode},
 	{"motor_lu",cmd_motor_lu},
 	{NULL, NULL}
 };
