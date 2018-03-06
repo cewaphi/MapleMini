@@ -801,25 +801,18 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
         palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
         palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
 
-        num_pulses = atoi(pOpt) * gear_reduction * 2; // Gets the right number of pulses to be done according to the gear reduction, multiplied by 2
+        num_pulses = atoi(pOpt); // Assign the number of pulses to be generated to the variable
 
        switch (atoi(mOpt)){
                 case 1: // Reset pins 30 and 31 // By reseting the pins before the switch, the mode 1 is selected by default
-                        chprintf(chp, "Mode 1 selected \r\n"); // Clock/direction mode CW
+                        chprintf(chp, "Mode 1 - Clock/direction selected \r\n"); // Clock/direction mode CW
 
-                        if (out1){
-                                palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
-                                out1=false;
-                                chprintf(chp, "Pin 30 cleared \r\n");
-                        }
-                        if (out2){
-                                palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-                                out2=false;
-                                chprintf(chp, "Pin 31 cleared \r\n");
-                        }
+                        palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Enable the motor operation
+                        out3 = true;
+                        chThdSleepMilliseconds(2000); // In order to have enough time to release the brake
+
 
                         chprintf(chp, "Pin to use: %d pinPorts size of: %d and number of pulses to produce %d \r\n",pin2use,i,num_pulses);
-                        chThdSleepMilliseconds(200); // In order to have enough time to have a pulse for the start/enable signal
 
                         for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
                                 palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
@@ -832,6 +825,11 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
                                 palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
                         }
                         chprintf(chp, "====== The direction bit value is :  %d ======== \r\n", atoi(dOpt));
+			
+			if (out3){
+                                palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset the start signal and with it, set the brake
+                                start=false;
+                        }
 
 
                 break;
