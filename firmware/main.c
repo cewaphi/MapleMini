@@ -718,7 +718,7 @@ exit_with_usage:
 				"\tOperation modes:  \r\n"
 				"\t 1 - Clock mode, turn left --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
                                 "\t 2 - Clock mode, turn right --> [require -p (number of pulses) and -d (direction of rotation)]  \r\n"
-                                "\t 3 - Turn 45 degree right \r\n"
+                                "\t 3 - Turn 45 degree CW \r\n"
                                 "\t 4 - Ref. run with external sensor (Homing) \r\n");
 
 }
@@ -727,10 +727,10 @@ exit_with_usage:
 /* Function for the Linear unit */
 
 static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
-        uint8_t i,pin2use,direction,start,gear_reduction=48,pOpt1, pOpt2; // Initialize the pins to be used //RL-D-50 has a gear reduction of 1:48
+        uint8_t i,pin2use,direction,start,pOpt1, pOpt2; // Initialize the pins to be used
         uint16_t num_pulses,u; // Unsigned short (0-65535)
-        char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL; // *sOpt = NULL;
-        bool out1 = false, out2 = false; // Variables to store the state of the outputs
+        char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL; 
+        bool out3 = false; // Variables to store the state of the outputs
 
         // Parsing
         for(i = 0; i < argc; i++) {
@@ -746,31 +746,25 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
                         if(++i >= argc) continue;
                         mOpt = argv[i];  // Selects the operation mode
                 }
-        /*      else if(strcmp(argv[i], "-s") == 0) {
-                        if(++i >= argc) continue;
-                        sOpt = argv[i];  // Sets the start/enable bit
-                }*/
         }
 
         if (!mOpt
                 || ((strcmp(mOpt, "1") == 0) && (!pOpt || !dOpt))
                 || ((strcmp(mOpt, "2") == 0) && (!pOpt || !dOpt))
-                /*|| ((strcmp(mOpt, "3") == 0) && !sOpt)*/
-                /*|| ((strcmp(mOpt, "4") == 0) && !sOpt)*/
-|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0) || (strcmp(mOpt, "3") == 0) || (strcmp(mOpt, "4") == 0))
+		|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0) || (strcmp(mOpt, "3") == 0) || (strcmp(mOpt, "4") == 0))
         )goto exit_with_usage;
 
         /* Pin definition for the pulse and direction outputs*/
 
         for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("25", pinPorts[i].pinNrString) == 0)) { // Use physical pin 25
+                if((pinPorts[i].as_gpio) && (strcmp("26", pinPorts[i].pinNrString) == 0)) { // Use physical pin 26
                         palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
                         pin2use=i;  // variable to store the pin where the pulse train will be generated
                 }
         }
 
         for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("21", pinPorts[i].pinNrString) == 0)) { //Use physical pin 21
+                if((pinPorts[i].as_gpio) && (strcmp("28", pinPorts[i].pinNrString) == 0)) { //Use physical pin 28
                         palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
                         if(strcmp(dOpt, "1") == 0) { //if dOpt is "1", set the rotation direction to CW
                                 palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
@@ -781,7 +775,7 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 
         /* Pin defition for the start/enable signal*/
         for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("29", pinPorts[i].pinNrString) == 0)) { //Use physical pin 21
+                if((pinPorts[i].as_gpio) && (strcmp("22", pinPorts[i].pinNrString) == 0)) { //Use physical pin 22
                         palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
                         start=i;
                 }
@@ -843,7 +837,7 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
                 break;
 
                 case 2: 
-                        chprintf(chp, "Mode 2 selected - Homing \r\n"); // Homing mode
+                        chprintf(chp, "Mode 2 - Homing selected \r\n"); // Homing mode
 			// To be filled with the Homing code
 
                 break;
@@ -856,10 +850,10 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
         return;
 exit_with_usage:
         chprintf(chp, "Usage: motor_lu (Linear Unit) -m <operation mode> -p [Pulses] -d [direction] \r\n"
-                                "\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and XXXXX degrees the linear unit)\r\n"
-                                "\tDirection: 0 (CCW) - 1 (CW)\r\n"
+                                "\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,9424mm/pulse the linear unit)\r\n"
+                                "\tDirection: 0 (Decrease the distance) - 1 (Increase the distance)\r\n"
                                 "\tOperation modes:  \r\n"
-                                "\t 1 - Clock mode, turn left --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
+                                "\t 1 - Clock/direction mode --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
                                 "\t 2 - Homing --> [require **********************************************************]  \r\n");
 }
 
