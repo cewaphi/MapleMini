@@ -635,7 +635,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                 		palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
 		                chThdSleepMilliseconds(2);
 		        }
-		        chprintf(chp, "Sent %d Pulses %d direction \r\n", atoi(pOpt), (int)(atof(dOpt)));
+		        chprintf(chp, "Sent %d Pulses %d direction \r\n", gear_reduction*atoi(pOpt), (int)(atof(dOpt)));
 		        if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand 
                 		palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
         		}
@@ -661,7 +661,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                                 palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
                                 chThdSleepMilliseconds(2);
                         }
-                        chprintf(chp, "Sent %d Pulses %d direction \r\n", atoi(pOpt), (int)(atof(dOpt)));
+                        chprintf(chp, "Sent %d Pulses %d direction \r\n", gear_reduction*atoi(pOpt), (int)(atof(dOpt)));
                         if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand 
                                 palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
                         }
