@@ -536,7 +536,7 @@ exit_with_usage:
 static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
         uint8_t i,pin2use,direction,start,gear_reduction=48,pOpt1, pOpt2; // Initialize the pins to be used //RL-D-50 has a gear reduction of 1:48
 	uint16_t num_pulses,u; // Unsigned short (0-65535)
-        char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL; // *sOpt = NULL;
+        char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL; 
 	bool out1 = false, out2 = false, out3 = false; // Variables to store the state of the outputs
 
         // Parsing
@@ -626,7 +626,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                                 chprintf(chp, "Pin 31 cleared \r\n");
                         }
 			
-			chprintf(chp, "Pin to use: %d pinPorts size of: %d and number of pulses to produce %d \r\n",pin2use,i,num_pulses);
+			chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
 			chThdSleepMilliseconds(200); // In order to have enough time to have a pulse for the start/enable signal
 
 		        for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
@@ -652,7 +652,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
                                 out2=false;
                         }
 
-	                chprintf(chp, "Pin to use: %d pinPorts size of: %d and number of pulses to produce %d \r\n",pin2use,i,num_pulses);
+	                chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
                         chThdSleepMilliseconds(500); // In order to have enough time to have a pulse for the start/enable signal
 
                         for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
@@ -708,7 +708,6 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 
 
         }
-        chprintf(chp, "Mode 1 selected by default \r\n");
 	return;
 
 exit_with_usage:
@@ -811,8 +810,7 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
                         out3 = true;
                         chThdSleepMilliseconds(2000); // In order to have enough time to release the brake
 
-
-                        chprintf(chp, "Pin to use: %d pinPorts size of: %d and number of pulses to produce %d \r\n",pin2use,i,num_pulses);
+                        chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
 
                         for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
                                 palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
@@ -824,13 +822,11 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
                         if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand 
                                 palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
                         }
-                        chprintf(chp, "====== The direction bit value is :  %d ======== \r\n", atoi(dOpt));
 			
 			if (out3){
                                 palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset the start signal and with it, set the brake
                                 start=false;
                         }
-
 
                 break;
 
@@ -843,8 +839,6 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 
 
         }
-        
-	chprintf(chp, "Mode 1 selected by default \r\n");
         return;
 exit_with_usage:
         chprintf(chp, "Usage: motor_lu (Linear Unit) -m <operation mode> -p [Pulses] -d [direction] \r\n"
