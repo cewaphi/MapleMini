@@ -819,6 +819,15 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
                 case 2: 
                         chprintf(chp, "Mode 2 - Homing selected \r\n"); // Homing mode
 			// To be filled with the Homing code
+	                palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Start the homing procedure
+                        out3 = true;
+			chThdSleepMilliseconds(200); // In order to leave enough time for the motor controller to read the signal
+
+                        if (out3){
+                                palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset the start signal and with it, set the brake
+                                start=false;
+                        }
+
 
                 break;
                 default: chprintf(chp, "Select one of the available modes \r\n");
