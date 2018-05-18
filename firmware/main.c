@@ -726,7 +726,7 @@ exit_with_usage:
 /* Function for the Linear unit */
 
 static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
-        uint8_t i,pin2use,direction,start,pOpt1, pOpt2; // Initialize the pins to be used
+        uint8_t i,pin2use,direction,start; // Initialize the pins to be used
         uint16_t num_pulses,u; // Unsigned short (0-65535)
         char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL; 
         bool out3 = false; // Variables to store the state of the outputs
@@ -749,8 +749,8 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 
         if (!mOpt
                 || ((strcmp(mOpt, "1") == 0) && (!pOpt || !dOpt))
-                || ((strcmp(mOpt, "2") == 0) && (!pOpt || !dOpt))
-		|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0) || (strcmp(mOpt, "3") == 0) || (strcmp(mOpt, "4") == 0))
+	        || ((strcmp(mOpt, "2") == 0) && (pOpt || dOpt)) // Because mode 2 does not require any input parameter
+	//	|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0))
         )goto exit_with_usage;
 
         /* Pin definition for the pulse and direction outputs*/
@@ -780,20 +780,6 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
                 }
         }
 
-        /* Pin definition to select the operation modes*/
-
-        for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("30", pinPorts[i].pinNrString) == 0)) { //Use physical pin 30
-                        pOpt1 = i;
-                        palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                }
-        }
-        for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("31", pinPorts[i].pinNrString) == 0)) { //Use physical pin 31
-                        pOpt2 = i;
-                        palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                }
-        }
 
 
         palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin); // Reset pins as its default state is high
@@ -846,7 +832,7 @@ exit_with_usage:
                                 "\tDirection: 0 (Decrease the distance) - 1 (Increase the distance)\r\n"
                                 "\tOperation modes:  \r\n"
                                 "\t 1 - Clock/direction mode --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
-                                "\t 2 - Homing --> [require **********************************************************]  \r\n");
+                                "\t 2 - Homing \r\n");
 }
 
 
