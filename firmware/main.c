@@ -750,7 +750,7 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
         if (!mOpt
                 || ((strcmp(mOpt, "1") == 0) && (!pOpt || !dOpt))
 	        || ((strcmp(mOpt, "2") == 0) && (pOpt || dOpt)) // Because mode 2 does not require any input parameter
-	//	|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0))
+		|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0))
         )goto exit_with_usage;
 
         /* Pin definition for the pulse and direction outputs*/
@@ -789,7 +789,7 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
         num_pulses = atoi(pOpt); // Assign the number of pulses to be generated to the variable
 
        switch (atoi(mOpt)){
-                case 1: // Reset pins 30 and 31 // By reseting the pins before the switch, the mode 1 is selected by default
+                case 1: 
                         chprintf(chp, "Mode 1 - Clock/direction selected \r\n"); // Clock/direction mode CW
 
                         palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Enable the motor operation
@@ -818,7 +818,6 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 
                 case 2: 
                         chprintf(chp, "Mode 2 - Homing selected \r\n"); // Homing mode
-			// To be filled with the Homing code
 	                palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Start the homing procedure
                         out3 = true;
 			chThdSleepMilliseconds(200); // In order to leave enough time for the motor controller to read the signal
@@ -828,10 +827,8 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
                                 start=false;
                         }
 
-
                 break;
                 default: chprintf(chp, "Select one of the available modes \r\n");
-
 
         }
         return;
