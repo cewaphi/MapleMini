@@ -755,23 +755,24 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 
         /* Pin definition for the pulse and direction outputs*/
 
-        for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("26", pinPorts[i].pinNrString) == 0)) { // Use physical pin 26
-                        palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                        pin2use=i;  // variable to store the pin where the pulse train will be generated
-                }
-        }
+	if (strcmp(mOpt,"1")==0){ // Configure the pins just when mode 1 is selected
+        	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+                	if((pinPorts[i].as_gpio) && (strcmp("26", pinPorts[i].pinNrString) == 0)) { // Use physical pin 26
+                        	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+                        	pin2use=i;  // variable to store the pin where the pulse train will be generated
+                	}
+        	}
 
-        for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("28", pinPorts[i].pinNrString) == 0)) { //Use physical pin 28
-                        palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                        if(strcmp(dOpt, "1") == 0) { //if dOpt is "1", set the rotation direction to CW
-                                palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
-                                direction=i;
-                        }
-                }
-        }
-
+        	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+                	if((pinPorts[i].as_gpio) && (strcmp("28", pinPorts[i].pinNrString) == 0)) { //Use physical pin 28
+                        	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+                        	if(strcmp(dOpt, "1") == 0) { //if dOpt is "1", set the rotation direction to CW
+                                	palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
+                                	direction=i;
+                        	}
+                	}
+        	}
+	}	
         /* Pin defition for the start/enable signal*/
         for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
                 if((pinPorts[i].as_gpio) && (strcmp("22", pinPorts[i].pinNrString) == 0)) { //Use physical pin 22
@@ -780,11 +781,7 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
                 }
         }
 
-
-
-        palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin); // Reset pins as its default state is high
-        palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-        palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
+        palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset pins as its default state is high
 
         num_pulses = atoi(pOpt); // Assign the number of pulses to be generated to the variable
 
