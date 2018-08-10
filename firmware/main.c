@@ -1,4 +1,3 @@
-// vim: expandtab tabstop=2 shiftwidth=2 softtabstop=2
 /*
     ChibiOS - Copyright (C) 2006..2015 Giovanni Di Sirio
 
@@ -40,6 +39,7 @@
 
 #include "nullstreams.h"
 
+#define MIN(x, y) ( ((x)<(y)) ? (x) : (y) )
 
 
 //#define SHELL_OPTION_PARSING_DEBUG
@@ -723,11 +723,32 @@ exit_with_usage:
 }
 
 
+/* Function to generate an ascending and descending ramps at the beginning and end of the pulse train */
+
+static void ramp_gen(uint8_t pin, uint16_t pulses, uint16_t min_delay) { // min_delay determines the target speed
+	uint16_t ramp_length = MIN(pulses/2, 10);
+	uint8_t delay = min_delay+10;
+	uint16_t pulse;
+
+	for(pulse = 0; pulse < pulses; pulse++) {
+		palSetPad(pinPorts[pin].gpio, pinPorts[pin].pin);
+		chThdSleepMilliseconds(delay);
+
+		palClearPad(pinPorts[pin].gpio, pinPorts[pin].pin);
+		chThdSleepMilliseconds(delay);
+
+		if (pulse >= pulses-ramp_length)
+			delay++;
+		else if (pulse < 0 + ramp_length)
+			delay--;
+	}
+}
+
 /* Function for the Linear unit */
 
 static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
         uint8_t i,pin2use,direction,start; // Initialize the pins to be used
-        uint16_t num_pulses,u; // Unsigned short (0-65535)
+        uint16_t num_pulses; // Unsigned short (0-65535)
         char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL; 
         bool out3 = false; // Variables to store the state of the outputs
 
@@ -795,18 +816,19 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 
                         chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
 
-                        for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
+                        ramp_gen(pin2use, num_pulses, 5);
+                        /*for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
                                 palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
-                                chThdSleepMilliseconds(0.5);      // Both Sleep periods should be the same in order to obtain an square function
+                                chThdSleepMilliseconds(5);      // Both Sleep periods should be the same in order to obtain an square function
                                 palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
-                                chThdSleepMilliseconds(0.5);
-                        }
+                                chThdSleepMilliseconds(5);
+                        }*/
                         chprintf(chp, "Sent %d Pulses %d direction \r\n", atoi(pOpt), (int)(atof(dOpt)));
                         if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand 
                                 palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
                         }
 			
-			if (out3){
+           		if (out3){
                                 palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset the start signal and with it, set the brake
                                 start=false;
                         }
@@ -815,9 +837,9 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 
                 case 2: 
                         chprintf(chp, "Mode 2 - Homing selected \r\n"); // Homing mode
-	                palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Start the homing procedure
+      	                palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Start the homing procedure
                         out3 = true;
-			chThdSleepMilliseconds(200); // In order to leave enough time for the motor controller to read the signal
+         		chThdSleepMilliseconds(200); // In order to leave enough time for the motor controller to read the signal
 
                         if (out3){
                                 palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset the start signal and with it, set the brake
