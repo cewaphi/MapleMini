@@ -177,7 +177,7 @@ static void cmd_gpio(BaseSequentialStream *chp, int argc, char *argv[]) {
 			|| !(((strcmp(dOpt, "out") == 0) || (strcmp(dOpt, "in") == 0)))) {
 		chprintf(chp, "Usage: gpio -d <direction> -p <pin> [-v <value>]\r\n"
 				"\twith direction:\r\n"
-				"\t\tin | out \r\n"
+				"\t\tin | out\r\n"
 				"\twith pin:\r\n"
 				"\t\t");
 		for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++)
@@ -532,11 +532,11 @@ exit_with_usage:
 
 
 
-/* Function for the rotary table/turntable */
 
-static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
-	uint8_t i,pin2use,direction,start,gear_reduction=48,pOpt1, pOpt2; // Initialize the pins to be used //RL-D-50 has a gear reduction of 1:48
-	uint16_t num_pulses,u; // Unsigned short (0-65535)
+/* Function for the rotary table/turntable */
+static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]){
+	uint8_t i, pin2use, direction, start, gear_reduction=48, pOpt1, pOpt2; // Initialize the pins to be used //RL-D-50 has a gear reduction of 1:48
+	uint16_t num_pulses, u; // Unsigned short (0-65535)
 	char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL;
 	bool out1 = false, out2 = false, out3 = false; // Variables to store the state of the outputs
 
@@ -614,20 +614,20 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 
 	switch (atoi(mOpt)){
 		case 1: // Reset pins 30 and 31 // By reseting the pins before the switch, the mode 1 is selected by default
-			chprintf(chp, "Mode 1 selected \r\n"); // Clock/direction mode CW
+			chprintf(chp, "Mode 1 selected\r\n"); // Clock/direction mode CW
 
 			if (out1){
 				palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
 				out1=false;
-				chprintf(chp, "Pin 30 cleared \r\n");
+				chprintf(chp, "Pin 30 cleared\r\n");
 			}
 			if (out2){
 				palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
 				out2=false;
-				chprintf(chp, "Pin 31 cleared \r\n");
+				chprintf(chp, "Pin 31 cleared\r\n");
 			}
 
-			chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
+			chprintf(chp, "Pin to use: %d , Pulses to produce %d\r\n",pin2use,num_pulses);
 			chThdSleepMilliseconds(200); // In order to have enough time to have a pulse for the start/enable signal
 
 			for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
@@ -636,7 +636,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 				palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
 				chThdSleepMilliseconds(2);
 			}
-			chprintf(chp, "Sent %d Pulses %d direction \r\n", gear_reduction*atoi(pOpt), (int)(atof(dOpt)));
+			chprintf(chp, "Sent %d Pulses %d direction\r\n", gear_reduction*atoi(pOpt), (int)(atof(dOpt)));
 			if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand
 				palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
 			}
@@ -644,7 +644,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 			break;
 
 		case 2: // Set pin 30 only
-			chprintf(chp, "Mode 2 selected \r\n"); // Clock/direction mode CCW
+			chprintf(chp, "Mode 2 selected\r\n"); // Clock/direction mode CCW
 
 			palSetPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
 			out1 = true;
@@ -653,7 +653,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 				out2=false;
 			}
 
-			chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
+			chprintf(chp, "Pin to use: %d , Pulses to produce %d\r\n",pin2use,num_pulses);
 			chThdSleepMilliseconds(500); // In order to have enough time to have a pulse for the start/enable signal
 
 			for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
@@ -662,7 +662,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 				palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
 				chThdSleepMilliseconds(2);
 			}
-			chprintf(chp, "Sent %d Pulses %d direction \r\n", gear_reduction*atoi(pOpt), (int)(atof(dOpt)));
+			chprintf(chp, "Sent %d Pulses %d direction\r\n", gear_reduction*atoi(pOpt), (int)(atof(dOpt)));
 			if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand
 				palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
 			}
@@ -670,7 +670,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 			break;
 
 		case 3: // Set pin 31 only
-			chprintf(chp, "Mode 3 selected \r\n"); // Turn 45 degree CCW
+			chprintf(chp, "Mode 3 selected\r\n"); // Turn 45 degree CCW
 
 			if (out1 == true){
 				palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
@@ -690,7 +690,7 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 			break;
 
 		case 4: // Set pins 30 and 31
-			chprintf(chp, "Mode 4 selected \r\n"); // Homing mode
+			chprintf(chp, "Mode 4 selected\r\n"); // Homing mode
 
 			palSetPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
 			out1 = true;
@@ -705,21 +705,23 @@ static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
 			}
 
 			break;
-		default: chprintf(chp, "Select one of the available modes \r\n");
+		default: chprintf(chp, "Select one of the available modes\r\n");
 
 
 	}
 	return;
 
 exit_with_usage:
-	chprintf(chp, "Usage: motor_rt -m <operation mode> -p [Pulses] -d [direction] \r\n"
+	chprintf(chp, "Usage: motor_rotary -m <mode> -p [pulses] -d [direction]\r\n"
 			"\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,0375 degrees the rotary table)\r\n"
-			"\tDirection: 0 (CW) - 1 (CCW)\r\n"
-			"\tOperation modes:  \r\n"
-			"\t 1 - Clock mode, turn left --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
-			"\t 2 - Clock mode, turn right --> [require -p (number of pulses) and -d (direction of rotation)]  \r\n"
-			"\t 3 - Turn 45 degree CW \r\n"
-			"\t 4 - Ref. run with external sensor (Homing) \r\n");
+			"\tModes:\r\n"
+			"\t  1 - Clock mode, turn left --> [require -p (number of pulses) and -d (direction of rotation)]\r\n"
+			"\t  2 - Clock mode, turn right --> [require -p (number of pulses) and -d (direction of rotation)]\r\n"
+			"\t  3 - Turn 45 degree CW\r\n"
+			"\t  4 - Ref. run with external sensor (Homing)\r\n"
+			"\tDirection:\r\n"
+			"\t  0 - CW\r\n"
+			"\t  1 - CCW\r\n");
 
 }
 
@@ -745,10 +747,12 @@ static void ramp_gen(uint8_t pin, uint16_t pulses, uint16_t min_delay) { // min_
 	}
 }
 
-/* Function for the Linear unit */
 
-static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
-	uint8_t i,pin2use,direction,start; // Initialize the pins to be used
+
+
+
+static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]){
+	uint8_t i, pin2use, direction, start; // Initialize the pins to be used
 	uint16_t num_pulses; // Unsigned short (0-65535)
 	char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL;
 	bool out3 = false; // Variables to store the state of the outputs
@@ -773,7 +777,7 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 			|| ((strcmp(mOpt, "1") == 0) && (!pOpt || !dOpt))
 			|| ((strcmp(mOpt, "2") == 0) && (pOpt || dOpt)) // Because mode 2 does not require any input parameter
 			|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0))
-		 )goto exit_with_usage;
+		 ) goto exit_with_usage;
 
 	/* Pin definition for the pulse and direction outputs*/
 
@@ -809,13 +813,13 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 
 	switch (atoi(mOpt)){
 		case 1:
-			chprintf(chp, "Mode 1 - Clock/direction selected \r\n"); // Clock/direction mode CW
+			chprintf(chp, "Mode 1 - Clock/direction selected\r\n"); // Clock/direction mode CW
 
 			palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Enable the motor operation
 			out3 = true;
 			chThdSleepMilliseconds(2000); // In order to have enough time to release the brake
 
-			chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
+			chprintf(chp, "Pin to use: %d , Pulses to produce %d\r\n",pin2use,num_pulses);
 
 			ramp_gen(pin2use, num_pulses, 5);
 			/*for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
@@ -824,7 +828,7 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 				palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
 				chThdSleepMilliseconds(5);
 				}*/
-			chprintf(chp, "Sent %d Pulses %d direction \r\n", atoi(pOpt), (int)(atof(dOpt)));
+			chprintf(chp, "Sent %d Pulses %d direction\r\n", atoi(pOpt), (int)(atof(dOpt)));
 			if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand
 				palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
 			}
@@ -837,7 +841,7 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 			break;
 
 		case 2:
-			chprintf(chp, "Mode 2 - Homing selected \r\n"); // Homing mode
+			chprintf(chp, "Mode 2 - Homing selected\r\n"); // Homing mode
 			palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Start the homing procedure
 			out3 = true;
 			chThdSleepMilliseconds(200); // In order to leave enough time for the motor controller to read the signal
@@ -848,17 +852,19 @@ static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
 			}
 
 			break;
-		default: chprintf(chp, "Select one of the available modes \r\n");
+		default: chprintf(chp, "Select one of the available modes\r\n");
 
 	}
 	return;
 exit_with_usage:
-	chprintf(chp, "Usage: motor_lu (Linear Unit) -m <operation mode> -p [Pulses] -d [direction] \r\n"
+	chprintf(chp, "Usage: motor_linear -m <mode> -p [pulses] -d [direction]\r\n"
 			"\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,9424mm/pulse the linear unit)\r\n"
-			"\tDirection: 0 (Decrease the distance) - 1 (Increase the distance)\r\n"
-			"\tOperation modes:  \r\n"
-			"\t 1 - Clock/direction mode --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
-			"\t 2 - Homing \r\n");
+			"\tModes:\r\n"
+			"\t  1 - Clock/direction mode --> [require -p (number of pulses) and -d (direction of rotation)]\r\n"
+			"\t  2 - Homing\r\n"
+			"\tDirection:\r\n"
+			"\t  0 - Decrease the distance\r\n"
+			"\t  1 - Increase the distance\r\n");
 }
 
 
@@ -1477,8 +1483,8 @@ static const ShellCommand commands[] = {
 	{"uniqueid", cmd_uniqueid},
 	{"adc", cmd_adc},
 	{"reset", cmd_reset},
-	{"motor_rt",cmd_motor_rt},
-	{"motor_lu",cmd_motor_lu},
+	{"motor_rotary", cmd_motor_rotary},
+	{"motor_linear", cmd_motor_linear},
 	{NULL, NULL}
 };
 
