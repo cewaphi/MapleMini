@@ -1,3 +1,4 @@
+// vim: noexpandtab tabstop=2 shiftwidth=2 softtabstop=2
 /*
     ChibiOS - Copyright (C) 2006..2015 Giovanni Di Sirio
 
@@ -57,13 +58,13 @@ struct pinPort {
 #define ADC_CHANNEL_NONE 255
 
 struct pinPort pinPorts[] = {
-//	GPIO?, ADC?,  MaplePin, Pin, PinGroup, ADC Channel
+	//	GPIO?, ADC?,  MaplePin, Pin, PinGroup, ADC Channel
 	{false, true,  "3",      0,  GPIOB,    ADC_CHANNEL_IN8},  // works
 	{false, true,  "4",      7,  GPIOA,    ADC_CHANNEL_IN7},  // TBD
 	{false, true,  "5",      6,  GPIOA,    ADC_CHANNEL_IN6},  // TBD
 	{false, true,  "6",      5,  GPIOA,    ADC_CHANNEL_IN5},  // TBD
 	{false, true,  "7",      4,  GPIOA,    ADC_CHANNEL_IN4},  // TBD
-	{false, true,  "8",      3,  GPIOA,    ADC_CHANNEL_IN3},  // works    
+	{false, true,  "8",      3,  GPIOA,    ADC_CHANNEL_IN3},  // works
 	{false, true,  "9",      2,  GPIOA,    ADC_CHANNEL_IN2},  // TBD
 	{true, false, "12",     15,  GPIOC,    ADC_CHANNEL_NONE}, // works
 	{true, false, "13",     14,  GPIOC,    ADC_CHANNEL_NONE}, // works
@@ -170,20 +171,20 @@ static void cmd_gpio(BaseSequentialStream *chp, int argc, char *argv[]) {
 	}
 
 	if(!dOpt
-	   || !pOpt
-	   || ((strcmp(dOpt, "in") == 0) && vOpt)
-	   || ((strcmp(dOpt, "out") == 0) && !vOpt)
-	   || !(((strcmp(dOpt, "out") == 0) || (strcmp(dOpt, "in") == 0)))) {
+			|| !pOpt
+			|| ((strcmp(dOpt, "in") == 0) && vOpt)
+			|| ((strcmp(dOpt, "out") == 0) && !vOpt)
+			|| !(((strcmp(dOpt, "out") == 0) || (strcmp(dOpt, "in") == 0)))) {
 		chprintf(chp, "Usage: gpio -d <direction> -p <pin> [-v <value>]\r\n"
-				 "\twith direction:\r\n"
-				 "\t\tin | out \r\n"
-				 "\twith pin:\r\n"
-				 "\t\t");
+				"\twith direction:\r\n"
+				"\t\tin | out \r\n"
+				"\twith pin:\r\n"
+				"\t\t");
 		for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++)
 			if(pinPorts[i].as_gpio)
 				chprintf(chp, "%s | ", pinPorts[i].pinNrString);
 		chprintf(chp,	 "\r\n\twith val: (only if direction out)\r\n"
-				 "\t\t0 | 1\r\n");
+				"\t\t0 | 1\r\n");
 		return;
 	}
 
@@ -279,48 +280,48 @@ static void cmd_uart(BaseSequentialStream *chp, int argc, char *argv[]) {
 	}
 
 	if((!dOpt)
-	   || (!pOpt)
-	   || !(((strcmp(dOpt, "out") == 0) || (strcmp(dOpt, "in") == 0)))
-	   || ((strcmp(dOpt, "in") == 0) && vOpt)
-	   || ((strcmp(dOpt, "in") == 0) && !lOpt && !tOpt && !vOpt)
-	   || ((strcmp(dOpt, "in") == 0) && !lOpt && tOpt && !vOpt)
-	   || ((strcmp(dOpt, "in") == 0) && lOpt && !tOpt && !vOpt)
-	   || ((strcmp(dOpt, "out") == 0) && lOpt)
-	   || ((strcmp(dOpt, "out") == 0) && tOpt)
-	   || ((strcmp(dOpt, "out") == 0) && !vOpt)
-	   || (bOpt && !((strcmp(bOpt, "9600") == 0)
-					 || (strcmp(bOpt, "19200") == 0)
-					 || (strcmp(bOpt, "38400") == 0)
-					 || (strcmp(bOpt, "57600") == 0)
-					 || (strcmp(bOpt, "115200") == 0)))) {
+			|| (!pOpt)
+			|| !(((strcmp(dOpt, "out") == 0) || (strcmp(dOpt, "in") == 0)))
+			|| ((strcmp(dOpt, "in") == 0) && vOpt)
+			|| ((strcmp(dOpt, "in") == 0) && !lOpt && !tOpt && !vOpt)
+			|| ((strcmp(dOpt, "in") == 0) && !lOpt && tOpt && !vOpt)
+			|| ((strcmp(dOpt, "in") == 0) && lOpt && !tOpt && !vOpt)
+			|| ((strcmp(dOpt, "out") == 0) && lOpt)
+			|| ((strcmp(dOpt, "out") == 0) && tOpt)
+			|| ((strcmp(dOpt, "out") == 0) && !vOpt)
+			|| (bOpt && !((strcmp(bOpt, "9600") == 0)
+					|| (strcmp(bOpt, "19200") == 0)
+					|| (strcmp(bOpt, "38400") == 0)
+					|| (strcmp(bOpt, "57600") == 0)
+					|| (strcmp(bOpt, "115200") == 0)))) {
 		chprintf(chp, "Usage: depending on direction\r\n"
-				 "\treading from uart:\r\n"
-				 "\t\tuart -d in -p <port> -l <length> -t <timeout> [-b <baudrate>]\r\n"
-				 "\twriting to uart:\r\n"
-				 "\t\tuart -d out -p <port> -v <data> [-b <baudrate>]\r\n"
-				 "\r\n"
-				 "\twith port:\r\n"
-				 "\t\t1 | 2 | 3\r\n"
-				 "\t\t\t(assigned pins:\r\n"
-				 "\t\t\t\tPort    MapleMini STM32   5V tolerant?\r\n"
-				 "\t\t\t\t 1 Rx:   15        PB7     yes\r\n"
-				 "\t\t\t\t 1 Tx:   16        PB6     yes\r\n"
-				 "\t\t\t\t 2 Rx:    8        PA3     NO\r\n"
-				 "\t\t\t\t 2 Tx:    9        PA2     NO\r\n"
-				 "\t\t\t\t 3 Rx:    0        PB11    yes\r\n"
-				 "\t\t\t\t 3 Tx:    1        PB10    yes\r\n"
-				 "\t\t\t)\r\n"
-				 "\r\n"
-				 "\twith length:\r\n"
-				 "\t\tinteger -- blocks until bytes are read or timeout\r\n"
-				 "\r\n"
-				 "\twith timeout:\r\n"
-				 "\t\tinteger -- timeout in ticks\r\n"
-				 "\r\n"
-				 "\twith baudrate:\r\n"
-				 "\t\tinteger -- optional baudrate parameter\r\n"
-				 "\t\t(if no paramter is given default baudrate is 115200)\r\n"
-				 "\t\tsupported baudrates are 9600, 19200, 38400, 57600, 115200\r\n");
+				"\treading from uart:\r\n"
+				"\t\tuart -d in -p <port> -l <length> -t <timeout> [-b <baudrate>]\r\n"
+				"\twriting to uart:\r\n"
+				"\t\tuart -d out -p <port> -v <data> [-b <baudrate>]\r\n"
+				"\r\n"
+				"\twith port:\r\n"
+				"\t\t1 | 2 | 3\r\n"
+				"\t\t\t(assigned pins:\r\n"
+				"\t\t\t\tPort    MapleMini STM32   5V tolerant?\r\n"
+				"\t\t\t\t 1 Rx:   15        PB7     yes\r\n"
+				"\t\t\t\t 1 Tx:   16        PB6     yes\r\n"
+				"\t\t\t\t 2 Rx:    8        PA3     NO\r\n"
+				"\t\t\t\t 2 Tx:    9        PA2     NO\r\n"
+				"\t\t\t\t 3 Rx:    0        PB11    yes\r\n"
+				"\t\t\t\t 3 Tx:    1        PB10    yes\r\n"
+				"\t\t\t)\r\n"
+				"\r\n"
+				"\twith length:\r\n"
+				"\t\tinteger -- blocks until bytes are read or timeout\r\n"
+				"\r\n"
+				"\twith timeout:\r\n"
+				"\t\tinteger -- timeout in ticks\r\n"
+				"\r\n"
+				"\twith baudrate:\r\n"
+				"\t\tinteger -- optional baudrate parameter\r\n"
+				"\t\t(if no paramter is given default baudrate is 115200)\r\n"
+				"\t\tsupported baudrates are 9600, 19200, 38400, 57600, 115200\r\n");
 		return;
 	}
 
@@ -460,19 +461,19 @@ static void cmd_pwmcapture(BaseSequentialStream *chp, int argc, char *argv[]) {
 	wdtEnable(0);
 
 	chprintf(chp, "frequency=%f\r\n"
-			 "dutycycle=%f\r\n"
-			 "captureclock=%d\r\n"
-			 "widthMean=%f\r\n"
-			 "widthVariance=%f\r\n"
-			 "periodMean=%f\r\n"
-			 "periodVariance=%f\r\n",
-			 (float) PWM_CAPTURE_CLOCK / periodMean,
-			 widthMean / periodMean,
-			 PWM_CAPTURE_CLOCK,
-			 widthMean,
-			 widthModVariance / widthSampleCounter,
-			 periodMean,
-			 periodModVariance / periodSampleCounter);
+			"dutycycle=%f\r\n"
+			"captureclock=%d\r\n"
+			"widthMean=%f\r\n"
+			"widthVariance=%f\r\n"
+			"periodMean=%f\r\n"
+			"periodVariance=%f\r\n",
+			(float) PWM_CAPTURE_CLOCK / periodMean,
+			widthMean / periodMean,
+			PWM_CAPTURE_CLOCK,
+			widthMean,
+			widthModVariance / widthSampleCounter,
+			periodMean,
+			periodModVariance / periodSampleCounter);
 }
 
 
@@ -506,10 +507,10 @@ static void cmd_pwm(BaseSequentialStream *chp, int argc, char *argv[]) {
 		1000,                                       /* PWM period */
 		NULL,
 		{
-		 {PWM_OUTPUT_DISABLED, NULL},
-		 {PWM_OUTPUT_ACTIVE_HIGH, NULL},
-		 {PWM_OUTPUT_DISABLED, NULL},
-		 {PWM_OUTPUT_DISABLED, NULL}
+			{PWM_OUTPUT_DISABLED, NULL},
+			{PWM_OUTPUT_ACTIVE_HIGH, NULL},
+			{PWM_OUTPUT_DISABLED, NULL},
+			{PWM_OUTPUT_DISABLED, NULL}
 		},
 		0,
 		0
@@ -525,8 +526,8 @@ static void cmd_pwm(BaseSequentialStream *chp, int argc, char *argv[]) {
 
 exit_with_usage:
 	chprintf(chp, "Usage: pwm -f [Frequency] -d [DutyCycle]\r\n"
-				"\tFrequency range: 1-10000Hz\r\n"
-				"\tDutyCycle: 0-1.0\r\n");
+			"\tFrequency range: 1-10000Hz\r\n"
+			"\tDutyCycle: 0-1.0\r\n");
 }
 
 
@@ -534,191 +535,191 @@ exit_with_usage:
 /* Function for the rotary table/turntable */
 
 static void cmd_motor_rt(BaseSequentialStream *chp, int argc, char *argv[]){
-        uint8_t i,pin2use,direction,start,gear_reduction=48,pOpt1, pOpt2; // Initialize the pins to be used //RL-D-50 has a gear reduction of 1:48
+	uint8_t i,pin2use,direction,start,gear_reduction=48,pOpt1, pOpt2; // Initialize the pins to be used //RL-D-50 has a gear reduction of 1:48
 	uint16_t num_pulses,u; // Unsigned short (0-65535)
-        char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL; 
+	char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL;
 	bool out1 = false, out2 = false, out3 = false; // Variables to store the state of the outputs
 
-        // Parsing
-        for(i = 0; i < argc; i++) {
-                if(strcmp(argv[i], "-d") == 0) {
-                        if(++i >= argc) continue;
-                        dOpt = argv[i];  // Sets the direction bit
-                }
-                else if(strcmp(argv[i], "-p") == 0) {
-                        if(++i >= argc) continue;
-                        pOpt = argv[i];  // Sets the number of pulses 
-                }
+	// Parsing
+	for(i = 0; i < argc; i++) {
+		if(strcmp(argv[i], "-d") == 0) {
+			if(++i >= argc) continue;
+			dOpt = argv[i];  // Sets the direction bit
+		}
+		else if(strcmp(argv[i], "-p") == 0) {
+			if(++i >= argc) continue;
+			pOpt = argv[i];  // Sets the number of pulses
+		}
 		else if(strcmp(argv[i], "-m") == 0) {
-                        if(++i >= argc) continue;
-                        mOpt = argv[i];  // Selects the operation mode
-                }
-        }
+			if(++i >= argc) continue;
+			mOpt = argv[i];  // Selects the operation mode
+		}
+	}
 
-        if (!mOpt
-		|| ((strcmp(mOpt, "1") == 0) && (!pOpt || !dOpt))
-		|| ((strcmp(mOpt, "2") == 0) && (!pOpt || !dOpt)) 
-		|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0) || (strcmp(mOpt, "3") == 0) || (strcmp(mOpt, "4") == 0))
-	)goto exit_with_usage;
+	if (!mOpt
+			|| ((strcmp(mOpt, "1") == 0) && (!pOpt || !dOpt))
+			|| ((strcmp(mOpt, "2") == 0) && (!pOpt || !dOpt))
+			|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0) || (strcmp(mOpt, "3") == 0) || (strcmp(mOpt, "4") == 0))
+		 )goto exit_with_usage;
 
 	/* Pin definition for the pulse and direction outputs*/
-	
-        for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("25", pinPorts[i].pinNrString) == 0)) { // Use physical pin 25
-                	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+
+	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+		if((pinPorts[i].as_gpio) && (strcmp("25", pinPorts[i].pinNrString) == 0)) { // Use physical pin 25
+			palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
 			pin2use=i;  // variable to store the pin where the pulse train will be generated
 		}
 	}
 
 	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("21", pinPorts[i].pinNrString) == 0)) { //Use physical pin 21
-                	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                        if(strcmp(dOpt, "1") == 0) { //if dOpt is "1", set the rotation direction to CW
-                        	palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
+		if((pinPorts[i].as_gpio) && (strcmp("21", pinPorts[i].pinNrString) == 0)) { //Use physical pin 21
+			palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+			if(strcmp(dOpt, "1") == 0) { //if dOpt is "1", set the rotation direction to CW
+				palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
 				direction=i;
-                        }
-                }
-        }
+			}
+		}
+	}
 
 	/* Pin defition for the start/enable signal*/
 
-	 for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("29", pinPorts[i].pinNrString) == 0)) { //Use physical pin 21
-                	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                        start=i;
-                }
-        }
+	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+		if((pinPorts[i].as_gpio) && (strcmp("29", pinPorts[i].pinNrString) == 0)) { //Use physical pin 21
+			palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+			start=i;
+		}
+	}
 
 	/* Pin definition to select the operation modes*/
 
-        for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("30", pinPorts[i].pinNrString) == 0)) { //Use physical pin 30
-                        pOpt1 = i;
-                        palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                }
-        }
-        for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("31", pinPorts[i].pinNrString) == 0)) { //Use physical pin 31
-                        pOpt2 = i;
-                        palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                }
-        }
+	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+		if((pinPorts[i].as_gpio) && (strcmp("30", pinPorts[i].pinNrString) == 0)) { //Use physical pin 30
+			pOpt1 = i;
+			palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+		}
+	}
+	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+		if((pinPorts[i].as_gpio) && (strcmp("31", pinPorts[i].pinNrString) == 0)) { //Use physical pin 31
+			pOpt2 = i;
+			palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+		}
+	}
 
 
-        palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin); // Reset pins as its default state is high
-        palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
+	palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin); // Reset pins as its default state is high
+	palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
 	palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
 
 	num_pulses = atoi(pOpt) * gear_reduction; // Gets the right number of pulses to be done according to the gear reduction
-	
-        switch (atoi(mOpt)){
-                case 1: // Reset pins 30 and 31 // By reseting the pins before the switch, the mode 1 is selected by default
-                        chprintf(chp, "Mode 1 selected \r\n"); // Clock/direction mode CW
 
-                        if (out1){
-                                palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
-                                out1=false;
-                                chprintf(chp, "Pin 30 cleared \r\n");
-                        }
-                        if (out2){
-                                palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-                                out2=false;
-                                chprintf(chp, "Pin 31 cleared \r\n");
-                        }
-			
+	switch (atoi(mOpt)){
+		case 1: // Reset pins 30 and 31 // By reseting the pins before the switch, the mode 1 is selected by default
+			chprintf(chp, "Mode 1 selected \r\n"); // Clock/direction mode CW
+
+			if (out1){
+				palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
+				out1=false;
+				chprintf(chp, "Pin 30 cleared \r\n");
+			}
+			if (out2){
+				palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
+				out2=false;
+				chprintf(chp, "Pin 31 cleared \r\n");
+			}
+
 			chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
 			chThdSleepMilliseconds(200); // In order to have enough time to have a pulse for the start/enable signal
 
-		        for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
-                		palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
-		                chThdSleepMilliseconds(2);      // Both Sleep periods should be the same in order to obtain an square function
-                		palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
-		                chThdSleepMilliseconds(2);
-		        }
-		        chprintf(chp, "Sent %d Pulses %d direction \r\n", gear_reduction*atoi(pOpt), (int)(atof(dOpt)));
-		        if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand 
-                		palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
-        		}
+			for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
+				palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
+				chThdSleepMilliseconds(2);      // Both Sleep periods should be the same in order to obtain an square function
+				palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
+				chThdSleepMilliseconds(2);
+			}
+			chprintf(chp, "Sent %d Pulses %d direction \r\n", gear_reduction*atoi(pOpt), (int)(atof(dOpt)));
+			if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand
+				palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
+			}
 
-                break;
+			break;
 
-                case 2: // Set pin 30 only
-                        chprintf(chp, "Mode 2 selected \r\n"); // Clock/direction mode CCW
+		case 2: // Set pin 30 only
+			chprintf(chp, "Mode 2 selected \r\n"); // Clock/direction mode CCW
 
-                        palSetPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
-                        out1 = true;
-                        if (out2 == true){
-                                palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-                                out2=false;
-                        }
+			palSetPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
+			out1 = true;
+			if (out2 == true){
+				palClearPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
+				out2=false;
+			}
 
-	                chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
-                        chThdSleepMilliseconds(500); // In order to have enough time to have a pulse for the start/enable signal
+			chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
+			chThdSleepMilliseconds(500); // In order to have enough time to have a pulse for the start/enable signal
 
-                        for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
-                                palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
-                                chThdSleepMilliseconds(2);      // Both Sleep periods should be the same in order to obtain an square function
-                                palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
-                                chThdSleepMilliseconds(2);
-                        }
-                        chprintf(chp, "Sent %d Pulses %d direction \r\n", gear_reduction*atoi(pOpt), (int)(atof(dOpt)));
-                        if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand 
-                                palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
-                        }
+			for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
+				palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
+				chThdSleepMilliseconds(2);      // Both Sleep periods should be the same in order to obtain an square function
+				palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
+				chThdSleepMilliseconds(2);
+			}
+			chprintf(chp, "Sent %d Pulses %d direction \r\n", gear_reduction*atoi(pOpt), (int)(atof(dOpt)));
+			if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand
+				palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
+			}
 
-                break;
+			break;
 
-                case 3: // Set pin 31 only
-                        chprintf(chp, "Mode 3 selected \r\n"); // Turn 45 degree CCW
+		case 3: // Set pin 31 only
+			chprintf(chp, "Mode 3 selected \r\n"); // Turn 45 degree CCW
 
-                        if (out1 == true){
-                                palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
-                                out1=false;
-                        }
-                        palSetPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-                        out2 = true;
+			if (out1 == true){
+				palClearPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
+				out1=false;
+			}
+			palSetPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
+			out2 = true;
 
-                        palSetPad(pinPorts[start].gpio, pinPorts[start].pin);
-                        out3 = true;
-                        chThdSleepMilliseconds(200); // In order to have enough time to have a pulse for the start/enable signal
-                        if (out3){
-                                palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
-                                start=false;
-                        }
-
-                break;
-
-                case 4: // Set pins 30 and 31
-                        chprintf(chp, "Mode 4 selected \r\n"); // Homing mode
-
-                        palSetPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
-                        out1 = true;
-                        palSetPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
-                        out2 = true;
 			palSetPad(pinPorts[start].gpio, pinPorts[start].pin);
 			out3 = true;
 			chThdSleepMilliseconds(200); // In order to have enough time to have a pulse for the start/enable signal
-                        if (out3){
-                                palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
-                                start=false;
+			if (out3){
+				palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
+				start=false;
 			}
-			
-                break;
-                default: chprintf(chp, "Select one of the available modes \r\n");
+
+			break;
+
+		case 4: // Set pins 30 and 31
+			chprintf(chp, "Mode 4 selected \r\n"); // Homing mode
+
+			palSetPad(pinPorts[pOpt1].gpio, pinPorts[pOpt1].pin);
+			out1 = true;
+			palSetPad(pinPorts[pOpt2].gpio, pinPorts[pOpt2].pin);
+			out2 = true;
+			palSetPad(pinPorts[start].gpio, pinPorts[start].pin);
+			out3 = true;
+			chThdSleepMilliseconds(200); // In order to have enough time to have a pulse for the start/enable signal
+			if (out3){
+				palClearPad(pinPorts[start].gpio, pinPorts[start].pin);
+				start=false;
+			}
+
+			break;
+		default: chprintf(chp, "Select one of the available modes \r\n");
 
 
-        }
+	}
 	return;
 
 exit_with_usage:
-        chprintf(chp, "Usage: motor_rt -m <operation mode> -p [Pulses] -d [direction] \r\n"
-                                "\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,0375 degrees the rotary table)\r\n"
-                                "\tDirection: 0 (CW) - 1 (CCW)\r\n"  
-				"\tOperation modes:  \r\n"
-				"\t 1 - Clock mode, turn left --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
-                                "\t 2 - Clock mode, turn right --> [require -p (number of pulses) and -d (direction of rotation)]  \r\n"
-                                "\t 3 - Turn 45 degree CW \r\n"
-                                "\t 4 - Ref. run with external sensor (Homing) \r\n");
+	chprintf(chp, "Usage: motor_rt -m <operation mode> -p [Pulses] -d [direction] \r\n"
+			"\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,0375 degrees the rotary table)\r\n"
+			"\tDirection: 0 (CW) - 1 (CCW)\r\n"
+			"\tOperation modes:  \r\n"
+			"\t 1 - Clock mode, turn left --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
+			"\t 2 - Clock mode, turn right --> [require -p (number of pulses) and -d (direction of rotation)]  \r\n"
+			"\t 3 - Turn 45 degree CW \r\n"
+			"\t 4 - Ref. run with external sensor (Homing) \r\n");
 
 }
 
@@ -747,117 +748,117 @@ static void ramp_gen(uint8_t pin, uint16_t pulses, uint16_t min_delay) { // min_
 /* Function for the Linear unit */
 
 static void cmd_motor_lu(BaseSequentialStream *chp, int argc, char *argv[]){
-        uint8_t i,pin2use,direction,start; // Initialize the pins to be used
-        uint16_t num_pulses; // Unsigned short (0-65535)
-        char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL; 
-        bool out3 = false; // Variables to store the state of the outputs
+	uint8_t i,pin2use,direction,start; // Initialize the pins to be used
+	uint16_t num_pulses; // Unsigned short (0-65535)
+	char *dOpt = NULL, *pOpt = NULL, *mOpt = NULL;
+	bool out3 = false; // Variables to store the state of the outputs
 
-        // Parsing
-        for(i = 0; i < argc; i++) {
-                if(strcmp(argv[i], "-d") == 0) {
-                        if(++i >= argc) continue;
-                        dOpt = argv[i];  // Sets the direction bit
-                }
-                else if(strcmp(argv[i], "-p") == 0) {
-                        if(++i >= argc) continue;
-                        pOpt = argv[i];  // Sets the number of pulses 
-                }
-                else if(strcmp(argv[i], "-m") == 0) {
-                        if(++i >= argc) continue;
-                        mOpt = argv[i];  // Selects the operation mode
-                }
-        }
+	// Parsing
+	for(i = 0; i < argc; i++) {
+		if(strcmp(argv[i], "-d") == 0) {
+			if(++i >= argc) continue;
+			dOpt = argv[i];  // Sets the direction bit
+		}
+		else if(strcmp(argv[i], "-p") == 0) {
+			if(++i >= argc) continue;
+			pOpt = argv[i];  // Sets the number of pulses
+		}
+		else if(strcmp(argv[i], "-m") == 0) {
+			if(++i >= argc) continue;
+			mOpt = argv[i];  // Selects the operation mode
+		}
+	}
 
-        if (!mOpt
-                || ((strcmp(mOpt, "1") == 0) && (!pOpt || !dOpt))
-	        || ((strcmp(mOpt, "2") == 0) && (pOpt || dOpt)) // Because mode 2 does not require any input parameter
-		|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0))
-        )goto exit_with_usage;
+	if (!mOpt
+			|| ((strcmp(mOpt, "1") == 0) && (!pOpt || !dOpt))
+			|| ((strcmp(mOpt, "2") == 0) && (pOpt || dOpt)) // Because mode 2 does not require any input parameter
+			|| !((strcmp(mOpt, "1") == 0) || (strcmp(mOpt, "2") == 0))
+		 )goto exit_with_usage;
 
-        /* Pin definition for the pulse and direction outputs*/
+	/* Pin definition for the pulse and direction outputs*/
 
 	if (strcmp(mOpt,"1")==0){ // Configure the pins just when mode 1 is selected
-        	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                	if((pinPorts[i].as_gpio) && (strcmp("26", pinPorts[i].pinNrString) == 0)) { // Use physical pin 26
-                        	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                        	pin2use=i;  // variable to store the pin where the pulse train will be generated
-                	}
-        	}
+		for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+			if((pinPorts[i].as_gpio) && (strcmp("26", pinPorts[i].pinNrString) == 0)) { // Use physical pin 26
+				palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+				pin2use=i;  // variable to store the pin where the pulse train will be generated
+			}
+		}
 
-        	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                	if((pinPorts[i].as_gpio) && (strcmp("28", pinPorts[i].pinNrString) == 0)) { //Use physical pin 28
-                        	palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                        	if(strcmp(dOpt, "1") == 0) { //if dOpt is "1", set the rotation direction to CW
-                                	palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
-                                	direction=i;
-                        	}
-                	}
-        	}
-	}	
-        /* Pin defition for the start/enable signal*/
-        for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
-                if((pinPorts[i].as_gpio) && (strcmp("22", pinPorts[i].pinNrString) == 0)) { //Use physical pin 22
-                        palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
-                        start=i;
-                }
-        }
+		for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+			if((pinPorts[i].as_gpio) && (strcmp("28", pinPorts[i].pinNrString) == 0)) { //Use physical pin 28
+				palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+				if(strcmp(dOpt, "1") == 0) { //if dOpt is "1", set the rotation direction to CW
+					palSetPad(pinPorts[i].gpio, pinPorts[i].pin);
+					direction=i;
+				}
+			}
+		}
+	}
+	/* Pin defition for the start/enable signal*/
+	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+		if((pinPorts[i].as_gpio) && (strcmp("22", pinPorts[i].pinNrString) == 0)) { //Use physical pin 22
+			palSetPadMode(pinPorts[i].gpio, pinPorts[i].pin, PAL_MODE_OUTPUT_PUSHPULL);
+			start=i;
+		}
+	}
 
-        palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset pins as its default state is high
+	palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset pins as its default state is high
 
-        num_pulses = atoi(pOpt); // Assign the number of pulses to be generated to the variable
+	num_pulses = atoi(pOpt); // Assign the number of pulses to be generated to the variable
 
-       switch (atoi(mOpt)){
-                case 1: 
-                        chprintf(chp, "Mode 1 - Clock/direction selected \r\n"); // Clock/direction mode CW
+	switch (atoi(mOpt)){
+		case 1:
+			chprintf(chp, "Mode 1 - Clock/direction selected \r\n"); // Clock/direction mode CW
 
-                        palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Enable the motor operation
-                        out3 = true;
-                        chThdSleepMilliseconds(2000); // In order to have enough time to release the brake
+			palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Enable the motor operation
+			out3 = true;
+			chThdSleepMilliseconds(2000); // In order to have enough time to release the brake
 
-                        chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
+			chprintf(chp, "Pin to use: %d , Pulses to produce %d \r\n",pin2use,num_pulses);
 
-                        ramp_gen(pin2use, num_pulses, 5);
-                        /*for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
-                                palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
-                                chThdSleepMilliseconds(5);      // Both Sleep periods should be the same in order to obtain an square function
-                                palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
-                                chThdSleepMilliseconds(5);
-                        }*/
-                        chprintf(chp, "Sent %d Pulses %d direction \r\n", atoi(pOpt), (int)(atof(dOpt)));
-                        if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand 
-                                palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
-                        }
-			
-           		if (out3){
-                                palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset the start signal and with it, set the brake
-                                start=false;
-                        }
+			ramp_gen(pin2use, num_pulses, 5);
+			/*for (u = 0; u < num_pulses; u++ ){      // Loops pOpt times in order to generate the pulses  // The loop could use again "i" instead of "u"
+				palSetPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
+				chThdSleepMilliseconds(5);      // Both Sleep periods should be the same in order to obtain an square function
+				palClearPad(pinPorts[pin2use].gpio, pinPorts[pin2use].pin);
+				chThdSleepMilliseconds(5);
+				}*/
+			chprintf(chp, "Sent %d Pulses %d direction \r\n", atoi(pOpt), (int)(atof(dOpt)));
+			if(strcmp(dOpt, "1") == 0) {    // Just clear the pin if it has been set beforehand
+				palClearPad(pinPorts[direction].gpio, pinPorts[direction].pin);         // Clear the direction pin before leaving the function
+			}
 
-                break;
+			if (out3){
+				palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset the start signal and with it, set the brake
+				start=false;
+			}
 
-                case 2: 
-                        chprintf(chp, "Mode 2 - Homing selected \r\n"); // Homing mode
-      	                palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Start the homing procedure
-                        out3 = true;
-         		chThdSleepMilliseconds(200); // In order to leave enough time for the motor controller to read the signal
+			break;
 
-                        if (out3){
-                                palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset the start signal and with it, set the brake
-                                start=false;
-                        }
+		case 2:
+			chprintf(chp, "Mode 2 - Homing selected \r\n"); // Homing mode
+			palSetPad(pinPorts[start].gpio, pinPorts[start].pin); //Start the homing procedure
+			out3 = true;
+			chThdSleepMilliseconds(200); // In order to leave enough time for the motor controller to read the signal
 
-                break;
-                default: chprintf(chp, "Select one of the available modes \r\n");
+			if (out3){
+				palClearPad(pinPorts[start].gpio, pinPorts[start].pin); // Reset the start signal and with it, set the brake
+				start=false;
+			}
 
-        }
-        return;
+			break;
+		default: chprintf(chp, "Select one of the available modes \r\n");
+
+	}
+	return;
 exit_with_usage:
-        chprintf(chp, "Usage: motor_lu (Linear Unit) -m <operation mode> -p [Pulses] -d [direction] \r\n"
-                                "\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,9424mm/pulse the linear unit)\r\n"
-                                "\tDirection: 0 (Decrease the distance) - 1 (Increase the distance)\r\n"
-                                "\tOperation modes:  \r\n"
-                                "\t 1 - Clock/direction mode --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
-                                "\t 2 - Homing \r\n");
+	chprintf(chp, "Usage: motor_lu (Linear Unit) -m <operation mode> -p [Pulses] -d [direction] \r\n"
+			"\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,9424mm/pulse the linear unit)\r\n"
+			"\tDirection: 0 (Decrease the distance) - 1 (Increase the distance)\r\n"
+			"\tOperation modes:  \r\n"
+			"\t 1 - Clock/direction mode --> [require -p (number of pulses) and -d (direction of rotation)] \r\n"
+			"\t 2 - Homing \r\n");
 }
 
 
@@ -935,17 +936,17 @@ static int scanSensors(void) {
 		uint8_t id[6];	// Product ID stored in first byte | Format: 2 Bytes followed by CRC followed by 2 Bytes followed by CRC
 		msg_t m = i2cMasterTransmitTimeout(i2cdx, base_addr_h, cmdID_h, 2, id, 4, 100);
 		if (m == MSG_OK && i2cGetErrors(i2cdx) == I2C_NO_ERROR && (id[0] == prodID_h[0] || id[0] == prodID_h[1] || id[0] == prodID_h[2])) {	// Found sensor
-				// This sensor can measure humidity as well as temperature, so we add two entries for it
-				sensorList[numSensors++] = (i2cSensor){i2cdx, base_addr_h, TEMP, 0xE0, &decodeTempSI, true};
-				sensorList[numSensors++] = (i2cSensor){i2cdx, base_addr_h, HUMID, 0xF5, &decodeHumidSI, false};				// Add entry to our sensorList
+			// This sensor can measure humidity as well as temperature, so we add two entries for it
+			sensorList[numSensors++] = (i2cSensor){i2cdx, base_addr_h, TEMP, 0xE0, &decodeTempSI, true};
+			sensorList[numSensors++] = (i2cSensor){i2cdx, base_addr_h, HUMID, 0xF5, &decodeHumidSI, false};				// Add entry to our sensorList
 
-				// Configure sensor
-				uint8_t data[2];
-				data[0] = regConf_h; data[1] = confVal_h;
-				i2cMasterTransmitTimeout(i2cdx, base_addr_h, data, 2, NULL, 0, 100);
+			// Configure sensor
+			uint8_t data[2];
+			data[0] = regConf_h; data[1] = confVal_h;
+			i2cMasterTransmitTimeout(i2cdx, base_addr_h, data, 2, NULL, 0, 100);
 
-				// Do an initial measurement, else doing a temp measurement before humidity returns a random value
-				i2cMasterTransmitTimeout(i2cdx, base_addr_h, &sensorList[numSensors-1].cmd, 1, NULL, 0, 100);
+			// Do an initial measurement, else doing a temp measurement before humidity returns a random value
+			i2cMasterTransmitTimeout(i2cdx, base_addr_h, &sensorList[numSensors-1].cmd, 1, NULL, 0, 100);
 		}
 
 		// Deactivate I2C port
@@ -1151,22 +1152,22 @@ static void cmd_sensor(BaseSequentialStream *chp, int argc, char *argv[]) {
 
 	return;
 
-// This part is only entered when the user entered something wrong
+	// This part is only entered when the user entered something wrong
 exit_with_usage:
 	chprintf(chp, "Usage: sensor temp|humid [-t <target>] [scan|show]\r\n"
-				"\twith temp:\r\n"
-				 "\t\tRead a temperature sensor\r\n"
-				"\twith humid:\r\n"
-				 "\t\tRead a humidity sensor\r\n"
-				"\twith target:\r\n"
-				 "\t\t0-7 (0-3 on I2CD1 and 4-7 on I2CD2)\r\n"
-				 "\t\tIf no target is defined every sensor will be read\r\n"
-				"\twith scan:\r\n"
-				 "\t\tScans for sensors on the I2C interfaces\r\n"
-				 "\t\tCan not be used with any other parameters!\r\n"
-				"\twith show:\r\n"
-				 "\t\tShows a list of sensors found during the last scan operation\r\n"
-				 "\t\tCan not be used with any other parameters!\r\n");
+			"\twith temp:\r\n"
+			"\t\tRead a temperature sensor\r\n"
+			"\twith humid:\r\n"
+			"\t\tRead a humidity sensor\r\n"
+			"\twith target:\r\n"
+			"\t\t0-7 (0-3 on I2CD1 and 4-7 on I2CD2)\r\n"
+			"\t\tIf no target is defined every sensor will be read\r\n"
+			"\twith scan:\r\n"
+			"\t\tScans for sensors on the I2C interfaces\r\n"
+			"\t\tCan not be used with any other parameters!\r\n"
+			"\twith show:\r\n"
+			"\t\tShows a list of sensors found during the last scan operation\r\n"
+			"\t\tCan not be used with any other parameters!\r\n");
 }
 
 
@@ -1305,15 +1306,15 @@ static void cmd_pollsensors(BaseSequentialStream *chp, int argc, char *argv[]) {
 
 exit_with_usage:
 	chprintf(chp, "Usage: pollsensors -p [polling_rate]\r\n"
-				"\tPolling rate range: 1-200\r\n"
-				"\tOutput Format: Type SensorID Value Status\r\n"
-				"\t\tType: 'T'(Temperature), 'H'(Humidity), or 'U'(Unknown)\r\n"
-				"\t\tSensorID: Unsigned Integer\r\n"
-				"\t\tValue: Float\r\n"
-				"\t\tStatus: 'OK', 'ERROR' or 'NORSP' (No response)\r\n"
-				"\tHitting any key will exit the application\r\n"
-				"\tSpecial Output: U 999 0.000000000 SLOW\r\n"
-				"\t\tIndicates polling rate is too high\r\n");
+			"\tPolling rate range: 1-200\r\n"
+			"\tOutput Format: Type SensorID Value Status\r\n"
+			"\t\tType: 'T'(Temperature), 'H'(Humidity), or 'U'(Unknown)\r\n"
+			"\t\tSensorID: Unsigned Integer\r\n"
+			"\t\tValue: Float\r\n"
+			"\t\tStatus: 'OK', 'ERROR' or 'NORSP' (No response)\r\n"
+			"\tHitting any key will exit the application\r\n"
+			"\tSpecial Output: U 999 0.000000000 SLOW\r\n"
+			"\t\tIndicates polling rate is too high\r\n");
 }
 
 
@@ -1358,33 +1359,33 @@ static void adc_bad_callback(ADCDriver *adcp, adcerror_t err)
 }
 
 static ADCConversionGroup adcgrpcfg = {
-  FALSE,                              // not circular
-  1,                                  // number of conversion channels
-  NULL,                               // ADC conversion end callback
-  adc_bad_callback,                   // ADC conversion error callback
-  0,                                  // CR1
-  0,                                  // CR2
-  ADC_SMPR1_SMP_AN10(ADC_SAMPLE_1P5)| // set all channels to 1.5 cycle timings
-  ADC_SMPR1_SMP_AN11(ADC_SAMPLE_1P5)|
-  ADC_SMPR1_SMP_AN12(ADC_SAMPLE_1P5)|
-  ADC_SMPR1_SMP_AN13(ADC_SAMPLE_1P5)|
-  ADC_SMPR1_SMP_AN14(ADC_SAMPLE_1P5)|
-  ADC_SMPR1_SMP_AN15(ADC_SAMPLE_1P5)|
-  ADC_SMPR1_SMP_SENSOR(ADC_SAMPLE_1P5)|
-  ADC_SMPR1_SMP_VREF(ADC_SAMPLE_1P5), // SMPR1
-  ADC_SMPR2_SMP_AN0(ADC_SAMPLE_1P5)|
-  ADC_SMPR2_SMP_AN1(ADC_SAMPLE_1P5)|
-  ADC_SMPR2_SMP_AN2(ADC_SAMPLE_1P5)|
-  ADC_SMPR2_SMP_AN3(ADC_SAMPLE_1P5)|
-  ADC_SMPR2_SMP_AN4(ADC_SAMPLE_1P5)|
-  ADC_SMPR2_SMP_AN5(ADC_SAMPLE_1P5)|
-  ADC_SMPR2_SMP_AN6(ADC_SAMPLE_1P5)|
-  ADC_SMPR2_SMP_AN7(ADC_SAMPLE_1P5)|
-  ADC_SMPR2_SMP_AN8(ADC_SAMPLE_1P5)|
-  ADC_SMPR2_SMP_AN9(ADC_SAMPLE_1P5),  // SMPR2
-  ADC_SQR1_NUM_CH(1),                 // SQR1 conversion group 13..16+len
-  0,                                  // SQR2 conversion group 7..12
-  0                                   // SQR3 conversion group 1..6
+	FALSE,                              // not circular
+	1,                                  // number of conversion channels
+	NULL,                               // ADC conversion end callback
+	adc_bad_callback,                   // ADC conversion error callback
+	0,                                  // CR1
+	0,                                  // CR2
+	ADC_SMPR1_SMP_AN10(ADC_SAMPLE_1P5)| // set all channels to 1.5 cycle timings
+		ADC_SMPR1_SMP_AN11(ADC_SAMPLE_1P5)|
+		ADC_SMPR1_SMP_AN12(ADC_SAMPLE_1P5)|
+		ADC_SMPR1_SMP_AN13(ADC_SAMPLE_1P5)|
+		ADC_SMPR1_SMP_AN14(ADC_SAMPLE_1P5)|
+		ADC_SMPR1_SMP_AN15(ADC_SAMPLE_1P5)|
+		ADC_SMPR1_SMP_SENSOR(ADC_SAMPLE_1P5)|
+		ADC_SMPR1_SMP_VREF(ADC_SAMPLE_1P5), // SMPR1
+	ADC_SMPR2_SMP_AN0(ADC_SAMPLE_1P5)|
+		ADC_SMPR2_SMP_AN1(ADC_SAMPLE_1P5)|
+		ADC_SMPR2_SMP_AN2(ADC_SAMPLE_1P5)|
+		ADC_SMPR2_SMP_AN3(ADC_SAMPLE_1P5)|
+		ADC_SMPR2_SMP_AN4(ADC_SAMPLE_1P5)|
+		ADC_SMPR2_SMP_AN5(ADC_SAMPLE_1P5)|
+		ADC_SMPR2_SMP_AN6(ADC_SAMPLE_1P5)|
+		ADC_SMPR2_SMP_AN7(ADC_SAMPLE_1P5)|
+		ADC_SMPR2_SMP_AN8(ADC_SAMPLE_1P5)|
+		ADC_SMPR2_SMP_AN9(ADC_SAMPLE_1P5),  // SMPR2
+	ADC_SQR1_NUM_CH(1),                 // SQR1 conversion group 13..16+len
+	0,                                  // SQR2 conversion group 7..12
+	0                                   // SQR3 conversion group 1..6
 };
 
 static void cmd_adc(BaseSequentialStream *chp, int argc, char *argv[]) {
