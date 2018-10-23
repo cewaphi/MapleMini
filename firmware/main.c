@@ -550,6 +550,53 @@ exit_with_usage:
 
 
 
+
+static void pulses_equidistant(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, bool startLow, unsigned pulseLen_ms)
+{
+	for(unsigned i = 0; i < count; ++i) {
+		if(startLow) {
+			palSetPad(gpio, pin);
+			chThdSleepMilliseconds(pulseLen_ms);
+		}
+		palClearPad(gpio, pin);
+		chThdSleepMilliseconds(pulseLen_ms);
+		if(!startLow) {
+			palSetPad(gpio, pin);
+			chThdSleepMilliseconds(pulseLen_ms);
+		}
+	}
+}
+
+static void pulses_ramped(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, bool startLow, unsigned minPulseLen_ms, unsigned rampSteps)
+{
+	// min_delay determines the target speed
+	uint16_t rampLength = MIN(count/2, rampSteps);
+	uint8_t delay = minPulseLen_ms + rampSteps;
+
+	for(unsigned i = 0; i < count; i++) {
+		if(startLow) {
+			palSetPad(gpio, pin);
+			chThdSleepMilliseconds(delay);
+		}
+		palClearPad(gpio, pin);
+		chThdSleepMilliseconds(delay);
+		if(!startLow) {
+			palSetPad(gpio, pin);
+			chThdSleepMilliseconds(delay);
+		}
+
+		if (i >= count - rampLength)
+			delay++;
+		else if (i < rampLength)
+			delay--;
+	}
+}
+
+
+
+
+
+
 /* Function for the rotary table/turntable */
 static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) {
 	const char maplePinPulses[] = "25";
@@ -656,23 +703,14 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 			// !fall through!
 		case 2: // Clock/direction mode CCW
 			// !fall through from above!
-			// FIXME: don't we need to set pinEnable here?
 			chprintf(chp, "Pin to use: %s, Pulses to produce %d\r\n",
 					pinPorts[pinPulses].pinNrString,
 					geared_pulses);
 			chThdSleepMilliseconds(200);
-			for (int i = 0; i < geared_pulses; i++ ){
-				// Loops in order to generate the pulses
-				// Both Sleep periods should be the same in order to obtain an square function
-				palSetPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
-				chThdSleepMilliseconds(2);
-				palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
-				chThdSleepMilliseconds(2);
-			}
+			pulses_equidistant(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, geared_pulses, false, 2);
 			chprintf(chp, "Sent %d Pulses %d direction\r\n", geared_pulses, direction);
 			if(1 == direction)
 				palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
-			// FIXME: don't we need to clear pinEnable here?
 			break;
 
 		case 3: // Turn 45 degree CCW
@@ -703,31 +741,6 @@ exit_with_usage:
 			"\t  1 - CCW\r\n");
 }
 
-
-
-
-
-/* Function to generate an ascending and descending ramps at the beginning
- * and end of the pulse train */
-static void ramp_gen(uint8_t pin, uint16_t pulses, uint16_t min_delay) {
-	// min_delay determines the target speed
-	uint16_t ramp_length = MIN(pulses/2, 10);
-	uint8_t delay = min_delay+10;
-	uint16_t pulse;
-
-	for(pulse = 0; pulse < pulses; pulse++) {
-		palSetPad(pinPorts[pin].gpio, pinPorts[pin].pin);
-		chThdSleepMilliseconds(delay);
-
-		palClearPad(pinPorts[pin].gpio, pinPorts[pin].pin);
-		chThdSleepMilliseconds(delay);
-
-		if (pulse >= pulses-ramp_length)
-			delay++;
-		else if (pulse < 0 + ramp_length)
-			delay--;
-	}
-}
 
 static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) {
 	const char maplePinPulses[] = "26";
@@ -815,7 +828,7 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 			chprintf(chp, "Pin to use: %s, Pulses to produce %d\r\n",
 					pinPorts[pinPulses].pinNrString,
 					pulses);
-			ramp_gen(pinPulses, pulses, 5);
+			pulses_ramped(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, pulses, false, 5, 10);
 			chprintf(chp, "Sent %d Pulses %d direction\r\n", pulses, direction);
 			if(1 == direction)
 				palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
