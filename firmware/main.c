@@ -599,6 +599,9 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 	if((0 == mode) || (1 == mode))
 		if(!paramPulses || !paramDirection)
 			goto exit_with_usage;
+	if((2 == mode) || (3 == mode))
+		if(paramPulses || paramDirection)
+			goto exit_with_usage;
 
 	if(paramDirection) {
 		direction = atoi(paramDirection);
@@ -618,10 +621,10 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 	// pin for direction
 	pinDirection = pinIndexForMaplePin(maplePinDirection, true, false, true);
 	palSetPadMode(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin, PAL_MODE_OUTPUT_PUSHPULL);
-	if(0 == direction)
-		palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
-	else if(1 == direction)
+	if(1 == direction)
 		palSetPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
+	else
+		palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
 
 	// pin for enable
 	pinEnable = pinIndexForMaplePin(maplePinEnable, true, false, true);
@@ -793,10 +796,10 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 
 		pinDirection = pinIndexForMaplePin(maplePinDirection, true, false, true);
 		palSetPadMode(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin, PAL_MODE_OUTPUT_PUSHPULL);
-		if(0 == direction)
-			palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
-		else if(1 == direction)
+		if(1 == direction)
 			palSetPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
+		else
+			palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
 	}
 
 	/* Pin defition for the start/enable signal*/
