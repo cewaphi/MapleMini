@@ -552,7 +552,13 @@ exit_with_usage:
 
 /* Function for the rotary table/turntable */
 static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) {
-	uint8_t pinPulses, pinDirection, pinEnable, pinMode1, pinMode2;
+	const char maplePinPulses[] = "25";
+	const char maplePinDirection[] = "21";
+	const char maplePinEnable[] = "29";
+	const char maplePinMode1[] = "30";
+	const char maplePinMode2[] = "31";
+
+	int pinPulses, pinDirection, pinEnable, pinMode1, pinMode2;
 
 	char * paramMode = NULL;
 	int mode = -1;
@@ -605,28 +611,30 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 		geared_pulses = pulses * gear_reduction;
 	}
 
-	pinPulses = pinIndexForMaplePin("25", true, false, true);
+	pinPulses = pinIndexForMaplePin(maplePinPulses, true, false, true);
 	palSetPadMode(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, PAL_MODE_OUTPUT_PUSHPULL);
+	palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
 
 	// pin for direction
-	pinDirection = pinIndexForMaplePin("21", true, false, true);
+	pinDirection = pinIndexForMaplePin(maplePinDirection, true, false, true);
 	palSetPadMode(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin, PAL_MODE_OUTPUT_PUSHPULL);
-	if(1 == direction)
+	if(0 == direction)
+		palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
+	else if(1 == direction)
 		palSetPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
 
 	// pin for enable
-	pinEnable = pinIndexForMaplePin("29", true, false, true);
+	pinEnable = pinIndexForMaplePin(maplePinEnable, true, false, true);
 	palSetPadMode(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin, PAL_MODE_OUTPUT_PUSHPULL);
 	palClearPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin);
 
-	// pin for mode
-	pinMode1 = pinIndexForMaplePin("30", true, false, true);
+	// first pin for mode
+	pinMode1 = pinIndexForMaplePin(maplePinMode1, true, false, true);
 	palSetPadMode(pinPorts[pinMode1].gpio, pinPorts[pinMode1].pin, PAL_MODE_OUTPUT_PUSHPULL);
-	palClearPad(pinPorts[pinMode1].gpio, pinPorts[pinMode1].pin);
-	// Reset pins as its default state is high
-	pinMode2 = pinIndexForMaplePin("31", true, false, true);
+
+	// second pin for mode
+	pinMode2 = pinIndexForMaplePin(maplePinMode2, true, false, true);
 	palSetPadMode(pinPorts[pinMode2].gpio, pinPorts[pinMode2].pin, PAL_MODE_OUTPUT_PUSHPULL);
-	palClearPad(pinPorts[pinMode2].gpio, pinPorts[pinMode2].pin);
 
 	// set mode pins
 	chprintf(chp, "Mode %d selected\r\n", mode);
@@ -642,47 +650,32 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 
 	switch(mode) {
 		case 1: // Clock/direction mode CW
+			// !fall through!
+		case 2: // Clock/direction mode CCW
+			// !fall through from above!
+			// FIXME: don't we need to set pinEnable here?
 			chprintf(chp, "Pin to use: %s, Pulses to produce %d\r\n",
 					pinPorts[pinPulses].pinNrString,
 					geared_pulses);
 			chThdSleepMilliseconds(200);
-			for(int i = 0; i < geared_pulses; i++ ){
-				// Loops in order to generate the pulses
-				palSetPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
-				chThdSleepMilliseconds(2);      // Both Sleep periods should be the same in order to obtain an square function
-				palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
-				chThdSleepMilliseconds(2);
-			}
-			chprintf(chp, "Sent %d Pulses %d direction\r\n", geared_pulses, direction);
-			if(1 == direction)
-				palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
-			break;
-
-		case 2: // Clock/direction mode CCW
-			chprintf(chp, "Pin to use: %s, Pulses to produce %d\r\n",
-					pinPorts[pinPulses].pinNrString,
-					geared_pulses);
-			chThdSleepMilliseconds(500);
 			for (int i = 0; i < geared_pulses; i++ ){
 				// Loops in order to generate the pulses
+				// Both Sleep periods should be the same in order to obtain an square function
 				palSetPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
 				chThdSleepMilliseconds(2);
-				// Both Sleep periods should be the same in order to obtain an square function
 				palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
 				chThdSleepMilliseconds(2);
 			}
 			chprintf(chp, "Sent %d Pulses %d direction\r\n", geared_pulses, direction);
 			if(1 == direction)
 				palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
+			// FIXME: don't we need to clear pinEnable here?
 			break;
 
 		case 3: // Turn 45 degree CCW
-			palSetPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin);
-			chThdSleepMilliseconds(200);
-			palClearPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin);
-			break;
-
-		case 4: // Homing mode
+			// !fall through!
+		case 4: // Homing Mode
+			// !fall through from above!
 			palSetPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin);
 			chThdSleepMilliseconds(200);
 			palClearPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin);
@@ -705,7 +698,6 @@ exit_with_usage:
 			"\tDirection:\r\n"
 			"\t  0 - CW\r\n"
 			"\t  1 - CCW\r\n");
-
 }
 
 
@@ -735,7 +727,11 @@ static void ramp_gen(uint8_t pin, uint16_t pulses, uint16_t min_delay) {
 }
 
 static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) {
-	uint8_t pinPulses, pinDirection, pinEnable;
+	const char maplePinPulses[] = "26";
+	const char maplePinDirection[] = "28";
+	const char maplePinEnable[] = "22";
+
+	int pinPulses, pinDirection, pinEnable;
 
 	char * paramMode = NULL;
 	int mode = -1;
@@ -791,64 +787,51 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 
 	if(1 == mode) {
 		// Configure the pins just when mode 1 is selected
-		pinPulses = pinIndexForMaplePin("26", true, false, true);
+		pinPulses = pinIndexForMaplePin(maplePinPulses, true, false, true);
 		palSetPadMode(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, PAL_MODE_OUTPUT_PUSHPULL);
+		palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
 
-		pinDirection = pinIndexForMaplePin("28", true, false, true);
+		pinDirection = pinIndexForMaplePin(maplePinDirection, true, false, true);
 		palSetPadMode(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin, PAL_MODE_OUTPUT_PUSHPULL);
-		if(1 == direction)
-			palSetPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
-		else
+		if(0 == direction)
 			palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
+		else if(1 == direction)
+			palSetPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
 	}
 
 	/* Pin defition for the start/enable signal*/
-	pinEnable = pinIndexForMaplePin("22", true, false, true);
+	pinEnable = pinIndexForMaplePin(maplePinEnable, true, false, true);
 	palSetPadMode(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin, PAL_MODE_OUTPUT_PUSHPULL);
 	palClearPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin); // Reset pins as its default state is high
 
 	switch(mode) {
 		case 1:
 			chprintf(chp, "Mode 1 - Clock/direction selected\r\n");
-
-			// Enable the motor operation
 			palSetPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin);
 			chThdSleepMilliseconds(2000);
-			// In order to have enough time to release the brake
-
 			chprintf(chp, "Pin to use: %s, Pulses to produce %d\r\n",
 					pinPorts[pinPulses].pinNrString,
 					pulses);
-
 			ramp_gen(pinPulses, pulses, 5);
 			chprintf(chp, "Sent %d Pulses %d direction\r\n", pulses, direction);
-			if(1 == direction) {
-				// Just clear the pin if it has been set beforehand
+			if(1 == direction)
 				palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
-				// Clear the direction pin before leaving the function
-			}
-
 			palClearPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin);
-			// Reset the pinEnable signal and with it, set the brake
-
 			break;
 
 		case 2:
 			chprintf(chp, "Mode 2 - Homing selected\r\n");
 			palSetPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin);
-			//Start the homing procedure
-
 			chThdSleepMilliseconds(200);
-			// In order to leave enough time for the motor controller to read the signal
-
 			palClearPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin);
-			// Reset the pinEnable signal and with it, set the brake
-
 			break;
-		default: chprintf(chp, "Select one of the available modes\r\n");
 
+		default:
+			chprintf(chp, "Select one of the available modes\r\n");
+			break;
 	}
 	return;
+
 exit_with_usage:
 	chprintf(chp, "Usage: motor_linear -m <mode> -p [pulses] -d [direction]\r\n"
 			"\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,9424mm/pulse the linear unit)\r\n"
