@@ -648,10 +648,10 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 	if((mode < 1) || (mode > 4))
 		goto exit_with_usage;
 
-	if((0 == mode) || (1 == mode))
+	if((1 == mode) || (2 == mode))
 		if(!paramPulses || !paramDirection)
 			goto exit_with_usage;
-	if((2 == mode) || (3 == mode))
+	if((3 == mode) || (4 == mode))
 		if(paramPulses || paramDirection)
 			goto exit_with_usage;
 
