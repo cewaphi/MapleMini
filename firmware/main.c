@@ -794,7 +794,7 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 		if(!paramPulses || !paramDirection)
 			goto exit_with_usage;
 	if(2 == mode)
-		if(paramPulses || paramDirection) // mode 2 does not need params
+		if(paramPulses || paramDirection)
 			goto exit_with_usage;
 
 	if(paramDirection) {
