@@ -85,7 +85,8 @@ struct pinPort pinPorts[] = {
 
 int pinIndexForMaplePin(const char * maplePin, bool onlyIfGpio, bool onlyIfAdc, bool assertIfNone)
 {
-	for(unsigned i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
+	unsigned i;
+	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
 		if(onlyIfGpio && !pinPorts[i].as_gpio)
 			continue;
 		if(onlyIfAdc && !pinPorts[i].as_adc)
@@ -553,7 +554,8 @@ exit_with_usage:
 
 static void pulses_equidistant(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, bool startLow, unsigned pulseLen_ms)
 {
-	for(unsigned i = 0; i < count; ++i) {
+	unsigned i;
+	for(i = 0; i < count; ++i) {
 		if(startLow) {
 			palSetPad(gpio, pin);
 			chThdSleepMilliseconds(pulseLen_ms);
@@ -572,8 +574,9 @@ static void pulses_ramped(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, bool 
 	// min_delay determines the target speed
 	uint16_t rampLength = MIN(count/2, rampSteps);
 	uint8_t delay = minPulseLen_ms + rampSteps;
+	unsigned i;
 
-	for(unsigned i = 0; i < count; i++) {
+	for(i = 0; i < count; i++) {
 		if(startLow) {
 			palSetPad(gpio, pin);
 			chThdSleepMilliseconds(delay);
@@ -618,8 +621,10 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 	int geared_pulses = -1;
 	const uint8_t gear_reduction = 48; // RL-D-50 has a gear reduction of 1:48
 
+	int i;
+
 	// Parsing
-	for(int i = 0; i < argc; i++) {
+	for(i = 0; i < argc; i++) {
 		if(strcmp(argv[i], "-d") == 0) {
 			if(++i >= argc)
 				continue;
@@ -758,8 +763,10 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 	char * paramPulses = NULL;
 	int pulses = -1;
 
+	int i;
+
 	// Parsing
-	for(int i = 0; i < argc; i++) {
+	for(i = 0; i < argc; i++) {
 		if(strcmp(argv[i], "-d") == 0) {
 			if(++i >= argc)
 				continue;
@@ -1390,6 +1397,7 @@ static void cmd_adc(BaseSequentialStream *chp, int argc, char *argv[]) {
 	char *pOpt = NULL;
 	int pin;
 	static adcsample_t samples[1];
+	unsigned i;
 
 	obmqSendMessage(MSG_CMD_ADC);
 
@@ -1399,7 +1407,7 @@ static void cmd_adc(BaseSequentialStream *chp, int argc, char *argv[]) {
 	if(NULL == pOpt) {
 		chprintf(chp, "Usage: adc <pin>\r\n"
 				"\twith pin:\r\n\t\t");
-		for(unsigned i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++)
+		for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++)
 			if(pinPorts[i].as_adc)
 				chprintf(chp, "%s | ", pinPorts[i].pinNrString);
 		chprintf(chp, "\r\n");
