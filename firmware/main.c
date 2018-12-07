@@ -609,8 +609,8 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 	// The following two pins (30 / 31) refer to (Input 2 / Input 3) on SMCI35
 	// These are used to call a predefined profile on the motor controller
 	// When GPIO off/on are represented by 0/1 the profiles are defined as follows:
-	// 0 0 CCW
-	// 1 0 CW
+	// 0 0 ROTATE_CCW
+	// 1 0 ROTATE_CW
 	// 0 1 Turn 45 degrees CW
 	// 1 1 home (drive to reference position)
 	const char maplePinMode1[] = "30";
@@ -626,10 +626,10 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 	const uint8_t gear_reduction = 48; // RL-D-50 has a gear reduction of 1:48
 
 	// define modes for the rotary unit
-	const int ROTATE = 1, HOME=2;
+	enum modeFlags { MODE_ROTATE = 1, MODE_HOME=2};
 
 	// define clockwise and counterclockwise motion
-	const int CW = 0, CCW = 1;
+	enum directionFlags {ROTATE_CW = 0, ROTATE_CCW = 1};
 
 	int i;
 
@@ -639,25 +639,21 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 			if(++i >= argc)
 				continue;
 			pulses = atoi(argv[i]);
-			if(pulses >= 0)
-				direction = CW;
-			else if (pulses < 0) {
-				direction = CCW;
-				// Direction set by direction parameter
-				// pulses need to be a positive int
-				pulses = abs(pulses);
-			}
+			direction = (pulses < 0) ? ROTATE_CCW : ROTATE_CW;
+			// Direction set by direction parameter
+			// pulses need to be a positive int
+			pulses = abs(pulses);
 			geared_pulses = pulses * gear_reduction;
-			mode = ROTATE;
+			mode = MODE_ROTATE;
 		}
 		else if(strcmp(argv[i], "home") == 0) {
-			mode = HOME;
+			mode = MODE_HOME;
 			if(++i >= argc)
 				continue;
 		}
 	}
 
-	if(!(mode == ROTATE || mode == HOME))
+	if(!(mode == MODE_ROTATE || mode == MODE_HOME))
 		goto exit_with_usage;
 
 	// SET UP OF PINS
@@ -670,9 +666,9 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 	pinDirection = pinIndexForMaplePin(maplePinDirection, true, false, true);
 	palSetPadMode(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin, PAL_MODE_OUTPUT_PUSHPULL);
 	// set direction pin
-	if(direction == CCW)
+	if(direction == ROTATE_CCW)
 		palSetPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
-	else if(direction == CW)
+	else if(direction == ROTATE_CW)
 		palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
 
 	// pin for enable
@@ -689,17 +685,17 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 	palSetPadMode(pinPorts[pinMode2].gpio, pinPorts[pinMode2].pin, PAL_MODE_OUTPUT_PUSHPULL);
 
 	// set mode pins
-	if(mode == ROTATE) {
+	if(mode == MODE_ROTATE) {
 		palSetPad(pinPorts[pinMode1].gpio, pinPorts[pinMode1].pin);
 		palClearPad(pinPorts[pinMode2].gpio, pinPorts[pinMode2].pin);
-		}
-	else if(mode == HOME) {
+	}
+	else if(mode == MODE_HOME) {
 		palSetPad(pinPorts[pinMode1].gpio, pinPorts[pinMode1].pin);
 		palSetPad(pinPorts[pinMode2].gpio, pinPorts[pinMode2].pin);
-		}
+	}
 
 
-	char direction_literal[25];
+	const char* direction_literal = NULL //[25];
 	float rotational_angle;
 
 	switch(mode) {
@@ -711,9 +707,9 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 					geared_pulses);
 			chThdSleepMilliseconds(200);
 			pulses_equidistant(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, geared_pulses, false, 2);
-			if(direction == CW)
+			if(direction == ROTATE_CW)
 				sprintf(direction_literal, "clockwise (CW)");
-			else if(direction == CCW)
+			else if(direction == ROTATE_CCW)
 				sprintf(direction_literal, "counterclockwise (CCW)");
 			// Each sent pulse will result in 1.8 degrees rotation
 			rotational_angle = pulses * 1.8;
@@ -762,14 +758,14 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 	int pinPulses, pinDirection, pinEnable;
 
 	// available modes
-	const int MOVE = 1, HOME = 2;
+	enum modeFlags {MODE_MOVE = 1, MODE_HOME = 2};
 
 	int mode = -1;
 	int direction = -1;
 	int pulses = -1;
 
 	// define motion directions: towards switchboard/wall
-	int SWITCHBOARD = 0, WALL = 1;
+	enum directionFlags {SWITCHBOARD = 0, WALL = 1};
 
 	int i;
 
@@ -779,30 +775,26 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 			if(++i >= argc)
 				continue;
 			pulses = atoi(argv[i]);
-			mode = MOVE;
+			mode = MODE_MOVE;
 			// direction is set by presign of the given argument
-			if(pulses >= 0)
-				direction = SWITCHBOARD;
-			else if (pulses < 0) {
-				direction = WALL;
-				// Direction set by direction parameter
-				// pulses need to be a positive int
-				pulses = abs(pulses);
-			}
+			direction = (pulses < 0) ? WALL : SWITCHBOARD;
+			// Direction set by direction parameter
+			// pulses need to be a positive int
+			pulses = abs(pulses);
 		}
 		else if(strcmp(argv[i], "home") == 0) {
-			mode = HOME;
+			mode = MODE_HOME;
 			if(++i >= argc)
 				continue;
 		}
 	}
 
-	if(!(mode == MOVE || mode == HOME))
+	if(!(mode == MODE_MOVE || mode == MODE_HOME))
 		goto exit_with_usage;
 
 	/* Pin definition for the pulse and direction outputs */
 
-	if(mode == MOVE) {
+	if(mode == MODE_MOVE) {
 		// Configure the pins just when the mode "move" is used and pulses will be send
 		pinPulses = pinIndexForMaplePin(maplePinPulses, true, false, true);
 		palSetPadMode(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, PAL_MODE_OUTPUT_PUSHPULL);
@@ -821,7 +813,7 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 	palSetPadMode(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin, PAL_MODE_OUTPUT_PUSHPULL);
 	palClearPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin); // Reset pins as its default state is high
 
-	char direction_literal[25];
+	const char* direction_literal = NULL //[25];
 
 	switch(mode) {
 		// 1: move
