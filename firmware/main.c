@@ -695,7 +695,7 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 	}
 
 
-	const char* direction_literal = NULL //[25];
+	char* direction_literal = NULL; //[25];
 	float rotational_angle;
 
 	switch(mode) {
@@ -708,9 +708,9 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 			chThdSleepMilliseconds(200);
 			pulses_equidistant(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, geared_pulses, false, 2);
 			if(direction == ROTATE_CW)
-				sprintf(direction_literal, "clockwise (CW)");
+				direction_literal = "clockwise (CW)";
 			else if(direction == ROTATE_CCW)
-				sprintf(direction_literal, "counterclockwise (CCW)");
+				direction_literal = "counterclockwise (CCW)";
 			// Each sent pulse will result in 1.8 degrees rotation
 			rotational_angle = pulses * 1.8;
 			chprintf(chp, "Number of pulses sent: %d\r\nDirection: %s\r\n", geared_pulses, direction_literal);
@@ -813,7 +813,7 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 	palSetPadMode(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin, PAL_MODE_OUTPUT_PUSHPULL);
 	palClearPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin); // Reset pins as its default state is high
 
-	const char* direction_literal = NULL //[25];
+	char* direction_literal = NULL; //[25];
 
 	switch(mode) {
 		// 1: move
@@ -827,10 +827,10 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 					pulses);
 			pulses_ramped(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, pulses, false, 5, 10);
 			if(direction == DIRECTION_MOTOR) {
-				sprintf(direction_literal, "towards motor");
+				direction_literal = "towards motor";
 				}
 			else if(direction == DIRECTION_HOME) {
-				sprintf(direction_literal, "towards homing position");
+				direction_literal = "towards homing position";
 				}
 			chprintf(chp, "Number of pulses sent: %d\r\nDirection: %s\r\n", pulses, direction_literal);
 			if(direction == DIRECTION_HOME)
