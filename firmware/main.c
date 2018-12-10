@@ -764,8 +764,8 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 	int direction = -1;
 	int pulses = -1;
 
-	// define motion directions: towards switchboard/wall
-	enum directionFlags {SWITCHBOARD = 0, WALL = 1};
+	// define motion directions: towards motor/homing position
+	enum directionFlags {DIRECTION_MOTOR = 0, DIRECTION_HOME = 1};
 
 	int i;
 
@@ -777,7 +777,7 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 			pulses = atoi(argv[i]);
 			mode = MODE_MOVE;
 			// direction is set by presign of the given argument
-			direction = (pulses < 0) ? WALL : SWITCHBOARD;
+			direction = (pulses < 0) ? DIRECTION_HOME : DIRECTION_MOTOR;
 			// Direction set by direction parameter
 			// pulses need to be a positive int
 			pulses = abs(pulses);
@@ -802,7 +802,7 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 
 		pinDirection = pinIndexForMaplePin(maplePinDirection, true, false, true);
 		palSetPadMode(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin, PAL_MODE_OUTPUT_PUSHPULL);
-		if(direction == SWITCHBOARD)
+		if(direction == DIRECTION_MOTOR)
 			palSetPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
 		else
 			palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
@@ -826,14 +826,14 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 					pinPorts[pinPulses].pinNrString,
 					pulses);
 			pulses_ramped(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, pulses, false, 5, 10);
-			if(direction == SWITCHBOARD) {
-				sprintf(direction_literal, "towards switchboard");
+			if(direction == DIRECTION_MOTOR) {
+				sprintf(direction_literal, "towards motor");
 				}
-			else if(direction == WALL) {
-				sprintf(direction_literal, "towards wall");
+			else if(direction == DIRECTION_HOME) {
+				sprintf(direction_literal, "towards homing position");
 				}
 			chprintf(chp, "Number of pulses sent: %d\r\nDirection: %s\r\n", pulses, direction_literal);
-			if(direction == WALL)
+			if(direction == DIRECTION_HOME)
 				palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
 			palClearPad(pinPorts[pinEnable].gpio, pinPorts[pinEnable].pin);
 			break;
@@ -859,8 +859,8 @@ exit_with_usage:
 			"\tModes:\r\n"
 			"\t 'home' - move to reference position to calibrate distance measurement \r\n"
 			"\t 'move' <pulses> - linear movement according to the given pulses\r\n"
-			"\t\t <pulses> Option 1: +(number of pulses as int) - movement towards switchboard\r\n"
-			"\t\t <pulses> Option 2: -(number of pulses as int) - movement towards wall\r\n"
+			"\t\t <pulses> Option 1: +(number of pulses as int) - movement towards motor\r\n"
+			"\t\t <pulses> Option 2: -(number of pulses as int) - movement towards homing position\r\n"
 			);
 }
 
