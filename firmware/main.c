@@ -552,6 +552,62 @@ exit_with_usage:
 
 
 
+static void cmd_pwm_linearunit(BaseSequentialStream *chp, int argc, char *argv[]) {
+	uint8_t i;
+	char *move_fraction = NULL
+
+	obmqSendMessage(MSG_CMD_PWM);
+
+	// Parsing
+	for(i = 0; i < argc; i++) {
+		if(strcmp(argv[i], "move") == 0) {
+			if(++i >= argc) continue;
+			move_fraction = atoi(argv[i]);
+			if((move_fraction > 1) || (move_fraction < 0))
+				goto exit_with_usage;
+		}
+	//	else if(strcmp(argv[i], "-f") == 0) {
+	//		if(++i >= argc) continue;
+	//		fOpt = argv[i];
+	//	}
+	}
+
+	if (!dOpt || !fOpt)
+		goto exit_with_usage;
+
+
+	PWMConfig pwmcfg = {
+		atoi(fOpt)*1000,                            /* PWM clock frequency.   */
+		1000,                                       /* PWM period */
+		NULL,
+		{
+			{PWM_OUTPUT_DISABLED, NULL},
+			{PWM_OUTPUT_ACTIVE_HIGH, NULL},
+			{PWM_OUTPUT_DISABLED, NULL},
+			{PWM_OUTPUT_DISABLED, NULL}
+		},
+		0,
+		0
+	};
+
+	palSetPadMode(GPIOA, 7, PAL_MODE_STM32_ALTERNATE_PUSHPULL);
+	pwmStart(&PWMD3, &pwmcfg);
+	pwmEnableChannel(&PWMD3, 1, PWM_PERCENTAGE_TO_WIDTH(&PWMD3, atof(dOpt)*10000));
+
+	chprintf(chp, "Enabled PWM on P4 with a frequency of %dHz and a duty cycle of %d%%\r\n", atoi(fOpt), (int)(atof(dOpt)*100));
+
+	return;
+
+exit_with_usage:
+	chprintf(chp, "Usage: pwm -f [Frequency] -d [DutyCycle]\r\n"
+			"\tFrequency range: 1-10000Hz\r\n"
+			"\tDutyCycle: 0-1.0\r\n");
+}
+
+
+
+
+
 static void pulses_equidistant(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, bool startLow, unsigned pulseLen_ms)
 {
 	unsigned i;
