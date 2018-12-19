@@ -501,6 +501,7 @@ static void cmd_pwmcapture(BaseSequentialStream *chp, int argc, char *argv[]) {
 static void cmd_pwm(BaseSequentialStream *chp, int argc, char *argv[]) {
 	uint8_t i;
 	char *dOpt = NULL, *fOpt = NULL;
+	char *timeout = NULL;
 
 	obmqSendMessage(MSG_CMD_PWM);
 
@@ -513,6 +514,10 @@ static void cmd_pwm(BaseSequentialStream *chp, int argc, char *argv[]) {
 		else if(strcmp(argv[i], "-f") == 0) {
 			if(++i >= argc) continue;
 			fOpt = argv[i];
+		}
+		else if(strcmp(argv[i], "-t") == 0) {
+			if(++i >= argc) continue;
+			timeout = argv[i];
 		}
 	}
 
@@ -538,14 +543,24 @@ static void cmd_pwm(BaseSequentialStream *chp, int argc, char *argv[]) {
 	pwmStart(&PWMD3, &pwmcfg);
 	pwmEnableChannel(&PWMD3, 1, PWM_PERCENTAGE_TO_WIDTH(&PWMD3, atof(dOpt)*10000));
 
+	if (timeout) {
+		if((atoi(timeout) <= 0) || (atoi(timeout) > 100000))
+			goto exit_with_usage;
+		chThdSleepMilliseconds(atoi(timeout));
+		pwmStop(&PWMD3);
+	}
+
 	chprintf(chp, "Enabled PWM on P4 with a frequency of %dHz and a duty cycle of %d%%\r\n", atoi(fOpt), (int)(atof(dOpt)*100));
+	if (timeout)
+		chprintf(chp, "Timeout after %d [ms]\r\n", atoi(timeout));
 
 	return;
 
 exit_with_usage:
-	chprintf(chp, "Usage: pwm -f [Frequency] -d [DutyCycle]\r\n"
+	chprintf(chp, "Usage: pwm -f [Frequency] -d [DutyCycle] -t [Timeout]\r\n"
 			"\tFrequency range: 1-10000Hz\r\n"
-			"\tDutyCycle: 0-1.0\r\n");
+			"\tDutyCycle: 0-1.0\r\n"
+			"\tTimeout: 0-100000 ms - time till the PWM signal is stopped\r\n");
 }
 
 
@@ -613,7 +628,7 @@ stroke = stroke_max * move_fraction;
 	palSetPadMode(GPIOA, 7, PAL_MODE_STM32_ALTERNATE_PUSHPULL);
 	pwmStart(&PWMD3, &pwmcfg);
 	pwmEnableChannel(&PWMD3, 1, PWM_PERCENTAGE_TO_WIDTH(&PWMD3, dCycle*10000));
-	chThdSleepMilliseconds(199);
+	chThdSleepMilliseconds(15);
 	pwmStop(&PWMD3);
 
 	chprintf(chp, "Enabled PWM on P4 with a frequency of %dHz and a duty cycle of %d%%\r\n",frequency,(int)(dCycle * 100));
