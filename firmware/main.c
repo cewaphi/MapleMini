@@ -58,7 +58,7 @@ struct pinPort {
 #define ADC_CHANNEL_NONE 255
 
 struct pinPort pinPorts[] = {
-	//	GPIO?, ADC?,  MaplePin, Pin, PinGroup, ADC Channel
+	// GPIO?, ADC?,  MaplePin, Pin, PinGroup, ADC Channel
 	{false, true,  "3",      0,  GPIOB,    ADC_CHANNEL_IN8},  // works
 	{false, true,  "4",      7,  GPIOA,    ADC_CHANNEL_IN7},  // TBD
 	{false, true,  "5",      6,  GPIOA,    ADC_CHANNEL_IN6},  // TBD
@@ -553,8 +553,13 @@ exit_with_usage:
 
 
 static void cmd_pwm_linearunit(BaseSequentialStream *chp, int argc, char *argv[]) {
+	// Function to control L12-R actuator from Actuonix
 	uint8_t i;
-	char *move_fraction = NULL
+	char *move_percent_arg = NULL;
+	float move_percent;
+	float move_fraction = 0;
+	float stroke_max = 30;   // defaults to 30mm stroke (L12 30)
+	float stroke;
 
 	obmqSendMessage(MSG_CMD_PWM);
 
@@ -562,22 +567,37 @@ static void cmd_pwm_linearunit(BaseSequentialStream *chp, int argc, char *argv[]
 	for(i = 0; i < argc; i++) {
 		if(strcmp(argv[i], "move") == 0) {
 			if(++i >= argc) continue;
-			move_fraction = atoi(argv[i]);
-			if((move_fraction > 1) || (move_fraction < 0))
+			move_percent_arg = argv[i];
+			move_percent = atof(move_percent_arg);
+			if((move_percent > 100) || (move_percent < 0))
 				goto exit_with_usage;
+			if (move_percent != 0)
+				move_fraction = move_percent / 100;
+		// stroke length parameter could be added if required
 		}
-	//	else if(strcmp(argv[i], "-f") == 0) {
-	//		if(++i >= argc) continue;
-	//		fOpt = argv[i];
-	//	}
 	}
 
-	if (!dOpt || !fOpt)
+	if (!move_percent_arg)
 		goto exit_with_usage;
 
+// The L12 linear actuator takes a signal with a fixed length
+// between 1ms and 2ms, where
+// 1ms: fully retract
+// 2ms: fully extend
+// >1ms && <2ms: linear mapping of the available stroke (0 to 30 mm)
+
+// This can be displayed for example with using a frequency f
+// f = 250 Hz
+// and a duty cycle d
+// 0.25 <= d <= 0.5
+int frequency;
+frequency = 250;
+float dCycle;
+dCycle = 0.25 + 0.25 * move_percent / 100;
+stroke = stroke_max * move_fraction;
 
 	PWMConfig pwmcfg = {
-		atoi(fOpt)*1000,                            /* PWM clock frequency.   */
+		frequency*1000,                       /* PWM clock frequency.   */
 		1000,                                       /* PWM period */
 		NULL,
 		{
@@ -592,16 +612,23 @@ static void cmd_pwm_linearunit(BaseSequentialStream *chp, int argc, char *argv[]
 
 	palSetPadMode(GPIOA, 7, PAL_MODE_STM32_ALTERNATE_PUSHPULL);
 	pwmStart(&PWMD3, &pwmcfg);
-	pwmEnableChannel(&PWMD3, 1, PWM_PERCENTAGE_TO_WIDTH(&PWMD3, atof(dOpt)*10000));
+	pwmEnableChannel(&PWMD3, 1, PWM_PERCENTAGE_TO_WIDTH(&PWMD3, dCycle*10000));
+	chThdSleepMilliseconds(199);
+	pwmStop(&PWMD3);
 
-	chprintf(chp, "Enabled PWM on P4 with a frequency of %dHz and a duty cycle of %d%%\r\n", atoi(fOpt), (int)(atof(dOpt)*100));
+	chprintf(chp, "Enabled PWM on P4 with a frequency of %dHz and a duty cycle of %d%%\r\n",frequency,(int)(dCycle * 100));
+	chprintf(chp, "Linear unit will drive to %d [%%] stroke length (%.1fmm/%.1fmm).\r\n", 
+			(int)move_percent,
+			stroke,
+			stroke_max
+			);
 
 	return;
 
 exit_with_usage:
-	chprintf(chp, "Usage: pwm -f [Frequency] -d [DutyCycle]\r\n"
-			"\tFrequency range: 1-10000Hz\r\n"
-			"\tDutyCycle: 0-1.0\r\n");
+	chprintf(chp, "Usage: pwm_L12 move [StrokeFraction]\r\n"
+			"\tStrokeFraction : 0-100 (percent of the stroke range)\r\n"
+			);
 }
 
 
@@ -1528,6 +1555,7 @@ static const ShellCommand commands[] = {
 	{"version", cmd_version},
 	{"pwmcapture", cmd_pwmcapture},
 	{"pwm", cmd_pwm},
+	{"pwm_L12", cmd_pwm_linearunit},
 	{"sensor", cmd_sensor},
 	{"pollsensors", cmd_pollsensors},
 	{"uniqueid", cmd_uniqueid},
