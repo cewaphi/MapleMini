@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "ch.h"
 #include "hal.h"
@@ -569,6 +570,122 @@ static void pulses_equidistant(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, 
 	}
 }
 
+
+
+
+
+// function to calculate the time of pulse n during acceleration
+static float t_pulse(uint8_t n,float a) {
+	float t;
+	t = sqrt(2. * n / a);
+	return t;
+}
+
+
+
+
+
+static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
+	uint8_t i;
+	uint8_t j;
+	char *pin = NULL, *count = NULL;
+	char *velocity = NULL, *acceleration = NULL;
+	uint8_t pinPulses;
+	// declarations for shorter form of physical constants
+	float a; // acceleration [pulses/s^2]
+	float v; // velocity [pulses/s]
+	// variables for calculations
+	float t_a; // acceleration time
+	uint8_t n_a; // pulses for acceleration
+	float t_n; // time stamp of pulse n
+	float t_sleep; // time for sleep between enable <-> disable <-> enable
+
+	for(i = 0; i < argc; i++) {
+		if(strcmp(argv[i], "-p") == 0) {
+			if(++i >= argc) continue;
+			pin = argv[i];
+			}
+		pinPulses = pinIndexForMaplePin(pin, true, false, true);
+		if(strcmp(argv[i], "-c") == 0) {
+			if(++i >= argc) continue;
+			count = argv[i];
+		}
+		if(strcmp(argv[i], "-v") == 0) {
+			if(++i >= argc) continue;
+			velocity = argv[i];
+			v = atof(velocity);
+		}
+		if(strcmp(argv[i], "-a") == 0) {
+			if(++i >= argc) continue;
+			acceleration = argv[i];
+			a = atof(acceleration);
+		}
+	}
+
+	// TODO sanity checking
+	// TODO exit_with_usage
+	if (!pin || !count || !velocity || !acceleration) {
+		goto exit_with_usage;
+	}
+
+	// initial configuration of the pin
+	// pinIndexForMaplePin(pinId, GPIO? ADC? assertIfNone?)
+	pinPulses = pinIndexForMaplePin(pin, true, false, true);
+	palSetPadMode(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, PAL_MODE_OUTPUT_PUSHPULL);
+	palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
+	chThdSleepMilliseconds(50); // settle time after initial config of the pin
+
+	// time required for acceleration
+	t_a = v / a;
+	// pulses till velocity is reached (rounded up)
+	n_a = ceil(0.5 * a * t_a*t_a);
+
+	for(j = 0; j < atoi(count); j++) {
+		// In the following the time between the current enable and the following one is determined
+		// For the first half of steps
+		if (j <= atoi(count)/2) {
+			// acceleration interval
+			if (j <= n_a) {
+				t_n = t_pulse(j+1, a) - t_pulse(j, a);
+			}
+			// constant motion at max. velocity
+			else {
+				t_n = 1 / v;
+			}
+		}
+		// for the second half of steps
+		else {
+			// deceleration interval (acceleration reversed)
+			if (j > atoi(count) - n_a) {
+				t_n = t_pulse(atoi(count)-j, a) - t_pulse(atoi(count)-(j+1), a);
+			}
+			// constant motion at max. velocity
+			else {
+				t_n = 1 / v;
+			}
+		t_sleep = t_n * 1000000 / 2.; // sleep is half of the timer interval [us]
+		// enable pin immediately
+		palSetPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
+		// disable in the middle of the ramp time
+		chThdSleepMicroseconds(t_sleep);
+		palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
+		// sleep for the other half of the ramp
+		chThdSleepMicroseconds(t_sleep);
+		}
+	}
+
+exit_with_usage:
+	chprintf(chp, "Usage: send_pulses -p [pinID] -c [count] -v [velocity] -a [acceleration]\r\n"
+			"\tpinID: ID of the pin according to the MapleMini pinout\r\n"
+			"\tcount: the number of pulses send\r\n"
+			"\tvelocity: the (stationary) maximum velocity of the stepper motor [pulses/s]\r\n"
+			"\tacceleration: constant acceleration of the stepper motor [pulses/s^2]\r\n"
+			);
+}
+
+
+
+
 static void pulses_ramped(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, bool startLow, unsigned minPulseLen_ms, unsigned rampSteps)
 {
 	// min_delay determines the target speed
@@ -799,6 +916,7 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 		pinPulses = pinIndexForMaplePin(maplePinPulses, true, false, true);
 		palSetPadMode(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, PAL_MODE_OUTPUT_PUSHPULL);
 		palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
+		chThdSleepMilliseconds(20); // settle time after initial config of the pin
 
 		pinDirection = pinIndexForMaplePin(maplePinDirection, true, false, true);
 		palSetPadMode(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin, PAL_MODE_OUTPUT_PUSHPULL);
@@ -806,6 +924,7 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 			palSetPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
 		else
 			palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
+		chThdSleepMilliseconds(20); // let the uc settle shortly before motor is enabled
 	}
 
 	/* Pin defition for the start/enable signal*/
@@ -1477,6 +1596,7 @@ static const ShellCommand commands[] = {
 	{"uniqueid", cmd_uniqueid},
 	{"adc", cmd_adc},
 	{"reset", cmd_reset},
+	{"send_pulses", cmd_send_pulses},
 	{"motor_rotary", cmd_motor_rotary},
 	{"motor_linear", cmd_motor_linear},
 	{NULL, NULL}
