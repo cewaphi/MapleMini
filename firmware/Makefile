@@ -202,6 +202,30 @@ CPPWARN = -Wall -Wextra
 ##############################################################################
 
 ##############################################################################
+
+# Start of default section
+#
+
+# List all default C defines here, like -D_DEBUG=1
+DDEFS =
+
+# List all default ASM defines here, like -D_DEBUG=1
+DADEFS =
+
+# List all default directories to look for include files here
+DINCDIR =
+
+# List the default directory to look for the libraries here
+DLIBDIR =
+
+# List all default libraries here
+DLIBS = -lm
+
+#
+# End of default section
+##############################################################################
+
+##############################################################################
 # Start of user section
 #
 
