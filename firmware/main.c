@@ -587,7 +587,6 @@ static float t_pulse(uint8_t n,float a) {
 
 static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 	uint8_t i;
-	uint8_t j;
 	char *pin = NULL, *count = NULL;
 	char *velocity = NULL, *acceleration = NULL;
 	uint8_t pinPulses;
@@ -628,6 +627,18 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 		goto exit_with_usage;
 	}
 
+	// print parsing information
+	chprintf(chp, "Parsed parameters\r\n"
+			"\tpinID: %d\r\n"
+			"\tcount: %d [pulses]\r\n"
+			"\tvelocity: %f [pulses/s]\r\n"
+			"\tacceleration: %f [pulses/s^2]\r\n",
+			atoi(pin),
+			atoi(count),
+			v,
+			a
+			);
+
 	// initial configuration of the pin
 	// pinIndexForMaplePin(pinId, GPIO? ADC? assertIfNone?)
 	pinPulses = pinIndexForMaplePin(pin, true, false, true);
@@ -637,16 +648,23 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 
 	// time required for acceleration
 	t_a = v / a;
-	// pulses till velocity is reached (rounded up)
-	n_a = ceil(0.5 * a * t_a*t_a);
+	chprintf(chp, "time for acceleration: %f [s]\r\n", t_a);
 
+	// pulses till velocity is reached (rounded up) #FIXME round down to secure velocity stays below v
+	// stationary
+	n_a = ceil(0.5 * a * t_a*t_a);
+	chprintf(chp, "number of pulses required till maximum velocity is reached: %d\r\n", n_a);
+
+	int j;
 	for(j = 0; j < atoi(count); j++) {
+		// TEST
+		chprintf(chp, "j: %d\r\n", j);
 		// In the following the time between the current enable and the following one is determined
 		// For the first half of steps
-		if (j <= atoi(count)/2) {
+		if (j <= (atoi(count)/2)) {
 			// acceleration interval
 			if (j <= n_a) {
-				t_n = t_pulse(j+1, a) - t_pulse(j, a);
+				t_n = t_pulse((j+1), a) - t_pulse(j, a);
 			}
 			// constant motion at max. velocity
 			else {
@@ -656,14 +674,19 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 		// for the second half of steps
 		else {
 			// deceleration interval (acceleration reversed)
-			if (j > atoi(count) - n_a) {
-				t_n = t_pulse(atoi(count)-j, a) - t_pulse(atoi(count)-(j+1), a);
+			if (j > (atoi(count) - n_a)) {
+				// TEST
+				chprintf(chp, "j > count - n_a\r\n");
+				t_n = t_pulse((atoi(count)-j), a) - t_pulse((atoi(count)-(j+1)), a);
 			}
 			// constant motion at max. velocity
 			else {
 				t_n = 1 / v;
 			}
+		}
+		chprintf(chp, "t_n: %.6f\r\n", t_n); // test print of t_ n
 		t_sleep = t_n * 1000000 / 2.; // sleep is half of the timer interval [us]
+		chprintf(chp, "t_sleep: %.6f\r\n", t_sleep);
 		// enable pin immediately
 		palSetPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
 		// disable in the middle of the ramp time
@@ -671,8 +694,9 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 		palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
 		// sleep for the other half of the ramp
 		chThdSleepMicroseconds(t_sleep);
-		}
 	}
+	chprintf(chp, "All pulses have been sent\r\n");
+	return;
 
 exit_with_usage:
 	chprintf(chp, "Usage: send_pulses -p [pinID] -c [count] -v [velocity] -a [acceleration]\r\n"
