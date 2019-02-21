@@ -575,7 +575,7 @@ static void pulses_equidistant(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, 
 
 
 // function to calculate the time of pulse n during acceleration
-static float t_pulse(uint8_t n,float a) {
+static float t_pulse(int n,float a) {
 	float t;
 	t = sqrt(2. * n / a);
 	return t;
@@ -595,7 +595,7 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 	float v; // velocity [pulses/s]
 	// variables for calculations
 	float t_a; // acceleration time
-	uint8_t n_a; // pulses for acceleration
+	int n_a; // pulses for acceleration
 	float t_n; // time stamp of pulse n
 	float t_sleep; // time for sleep between enable <-> disable <-> enable
 
@@ -653,6 +653,7 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 	// pulses till velocity is reached (rounded up) #FIXME round down to secure velocity stays below v
 	// stationary
 	n_a = ceil(0.5 * a * t_a*t_a);
+	chprintf(chp, "number of pulses required till maximum velocity is reached: %d\r\n", n_a);
 	chprintf(chp, "number of pulses required till maximum velocity is reached: %d\r\n", n_a);
 
 	int j;
