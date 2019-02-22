@@ -622,7 +622,6 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 	}
 
 	// TODO sanity checking
-	// TODO exit_with_usage
 	if (!pin || !count || !velocity || !acceleration) {
 		goto exit_with_usage;
 	}
@@ -650,21 +649,26 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 	t_a = v / a;
 	chprintf(chp, "time for acceleration: %f [s]\r\n", t_a);
 
-	// pulses till velocity is reached (rounded up) #FIXME round down to secure velocity stays below v
-	// stationary
-	n_a = ceil(0.5 * a * t_a*t_a);
+	/* pulses till velocity is reached 
+	   rounded down to secure velocity stays below v stationary
+	   Note: if n_a round to 0 --> the velocity is reached in less than 1 pulse of acceleration
+	         as a result no acceleration takes place and v is applied immediately
+	*/
+	n_a = round(0.5 * a * t_a*t_a);
 	chprintf(chp, "number of pulses required till maximum velocity is reached: %d\r\n", n_a);
 	chprintf(chp, "number of pulses required till maximum velocity is reached: %d\r\n", n_a);
 
 	int j;
+	int pulse_j;
 	for(j = 0; j < atoi(count); j++) {
+		pulse_j = j+1;
 		// TEST
-		chprintf(chp, "j: %d\r\n", j);
+		chprintf(chp, "j: %d    pulse: %d\r\n", j, pulse_j);
 		// In the following the time between the current enable and the following one is determined
 		// For the first half of steps
-		if (j <= (atoi(count)/2)) {
+		if (pulse_j <= (atoi(count)/2)) {
 			// acceleration interval
-			if (j <= n_a) {
+			if (pulse_j <= n_a) {
 				t_n = t_pulse((j+1), a) - t_pulse(j, a);
 			}
 			// constant motion at max. velocity
@@ -675,9 +679,7 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 		// for the second half of steps
 		else {
 			// deceleration interval (acceleration reversed)
-			if (j > (atoi(count) - n_a)) {
-				// TEST
-				chprintf(chp, "j > count - n_a\r\n");
+			if (pulse_j > (atoi(count) - n_a)) {
 				t_n = t_pulse((atoi(count)-j), a) - t_pulse((atoi(count)-(j+1)), a);
 			}
 			// constant motion at max. velocity
