@@ -590,14 +590,15 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 	char *pin = NULL, *count = NULL;
 	char *velocity = NULL, *acceleration = NULL;
 	uint8_t pinPulses;
-	// declarations for shorter form of physical constants
+	// declarations for shorter form of constant physical quantity
 	float a; // acceleration [pulses/s^2]
 	float v; // velocity [pulses/s]
 	// variables for calculations
 	float t_a; // acceleration time
 	int n_a; // pulses for acceleration
-	float t_n; // time stamp of pulse n
-	float t_sleep; // time for sleep between enable <-> disable <-> enable
+	float t_n; // [s] time between two consecutive pulses
+	float t_n_2; // [s] half of t_n
+	float t_sleep; // [ms] or [us] time t_n converted according to the used sleep function
 
 	for(i = 0; i < argc; i++) {
 		if(strcmp(argv[i], "-p") == 0) {
@@ -656,14 +657,12 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 	*/
 	n_a = round(0.5 * a * t_a*t_a);
 	chprintf(chp, "number of pulses required till maximum velocity is reached: %d\r\n", n_a);
-	chprintf(chp, "number of pulses required till maximum velocity is reached: %d\r\n", n_a);
 
 	int j;
 	int pulse_j;
+	chprintf(chp, "Start sending pulses\r\n");
 	for(j = 0; j < atoi(count); j++) {
 		pulse_j = j+1;
-		// TEST
-		chprintf(chp, "j: %d    pulse: %d\r\n", j, pulse_j);
 		// In the following the time between the current enable and the following one is determined
 		// For the first half of steps
 		if (pulse_j <= (atoi(count)/2)) {
@@ -687,18 +686,31 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
 				t_n = 1 / v;
 			}
 		}
-		chprintf(chp, "t_n: %.6f\r\n", t_n); // test print of t_ n
-		t_sleep = t_n * 1000000 / 2.; // sleep is half of the timer interval [us]
-		chprintf(chp, "t_sleep: %.6f\r\n", t_sleep);
-		// enable pin immediately
-		palSetPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
-		// disable in the middle of the ramp time
-		chThdSleepMicroseconds(t_sleep);
-		palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
-		// sleep for the other half of the ramp
-		chThdSleepMicroseconds(t_sleep);
+		t_n_2 = t_n / 2.;
+		// if sleep time > 1/1000 s --> use [ms] sleep timer
+		if (t_n_2 > 0.001) {
+			t_sleep = t_n_2 * 1000; // sleep is half of the timer interval [us]
+			// enable pin immediately
+			palSetPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
+			// disable in the middle of the ramp time
+			chThdSleepMilliseconds(t_sleep);
+			palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
+			// sleep for the other half of the ramp
+			chThdSleepMilliseconds(t_sleep);
+		}
+		// else use [us] as sleep timer
+		else {
+			t_sleep = t_n_2 * 1000000; // sleep is half of the timer interval [us]
+			// enable pin immediately
+			palSetPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
+			// disable in the middle of the ramp time
+			chThdSleepMicroseconds(t_sleep);
+			palClearPad(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin);
+			// sleep for the other half of the ramp
+			chThdSleepMicroseconds(t_sleep);
+		}
 	}
-	chprintf(chp, "All pulses have been sent\r\n");
+	chprintf(chp, "All %d  pulses have been sent\r\n", pulse_j);
 	return;
 
 exit_with_usage:
