@@ -618,8 +618,6 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 
 	char * paramPulses = NULL;
 	int pulses = -1;
-	int geared_pulses = -1;
-	const uint8_t gear_reduction = 48; // RL-D-50 has a gear reduction of 1:48
 
 	int i;
 
@@ -663,7 +661,6 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 
 	if(paramPulses) {
 		pulses = atoi(paramPulses);
-		geared_pulses = pulses * gear_reduction;
 	}
 
 	pinPulses = pinIndexForMaplePin(maplePinPulses, true, false, true);
@@ -710,10 +707,10 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 			// !fall through from above!
 			chprintf(chp, "Pin to use: %s, Pulses to produce %d\r\n",
 					pinPorts[pinPulses].pinNrString,
-					geared_pulses);
+					pulses);
 			chThdSleepMilliseconds(200);
-			pulses_equidistant(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, geared_pulses, false, 2);
-			chprintf(chp, "Sent %d Pulses %d direction\r\n", geared_pulses, direction);
+			pulses_equidistant(pinPorts[pinPulses].gpio, pinPorts[pinPulses].pin, pulses, false, 2);
+			chprintf(chp, "Sent %d Pulses %d direction\r\n", pulses, direction);
 			if(1 == direction)
 				palClearPad(pinPorts[pinDirection].gpio, pinPorts[pinDirection].pin);
 			break;
