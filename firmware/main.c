@@ -41,8 +41,11 @@
 
 #include "nullstreams.h"
 
-#define MIN(x, y) ( ((x)<(y)) ? (x) : (y) )
 
+
+
+
+#define MIN(x, y) ( ((x)<(y)) ? (x) : (y) )
 
 //#define SHELL_OPTION_PARSING_DEBUG
 
@@ -84,8 +87,7 @@ struct pinPort pinPorts[] = {
 	{true, false, "31",     12,  GPIOB,    ADC_CHANNEL_NONE}, // works
 };
 
-int pinIndexForMaplePin(const char * maplePin, bool onlyIfGpio, bool onlyIfAdc, bool assertIfNone)
-{
+int pinIndexForMaplePin(const char * maplePin, bool onlyIfGpio, bool onlyIfAdc, bool assertIfNone) {
 	unsigned i;
 	for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++) {
 		if(onlyIfGpio && !pinPorts[i].as_gpio)
@@ -98,6 +100,10 @@ int pinIndexForMaplePin(const char * maplePin, bool onlyIfGpio, bool onlyIfAdc, 
 	while(assertIfNone) { /* endless loop */ };
 	return -1;
 }
+
+
+
+
 
 /* Configuration for command "uart" */
 struct uartPort {
@@ -113,10 +119,14 @@ struct uartPort uartPorts[] = {
 	{"3", 10, 11, GPIOB, GPIOB, &SD3} //Maple: Tx: D1,  Rx: D0;  STM32: Tx: PB10, Rx: PB11; 5V tolerant
 };
 
+
+
+
+
 /* Configuration for I2C commands and sensors */
 I2CConfig i2ccfg = {
 	OPMODE_I2C,
-	8000,		// 10kHZ I2C Frequency
+	8000,  // 10kHZ I2C Frequency
 	STD_DUTY_CYCLE
 };
 
@@ -132,6 +142,10 @@ struct i2cPort i2cPorts[] = {
 	{ &I2CD1, GPIOB, 6, GPIOB, 7 },
 	{ &I2CD2, GPIOB, 10, GPIOB, 11 }
 };
+
+
+
+
 
 typedef enum {
 	TEMP,
@@ -150,11 +164,14 @@ typedef struct {
 #define MAX_NUM_SENSORS 16
 i2cSensor sensorList[MAX_NUM_SENSORS];
 
-/*===========================================================================*/
-/* Command line related.                                                     */
-/*===========================================================================*/
-
 #define SHELL_WA_SIZE   THD_WORKING_AREA_SIZE(8192)
+
+
+
+
+/*===========================================================================*/
+/* Implementation of commands                                                */
+/*===========================================================================*/
 
 static void cmd_gpio(BaseSequentialStream *chp, int argc, char *argv[]) {
 	uint8_t i;
@@ -199,7 +216,7 @@ static void cmd_gpio(BaseSequentialStream *chp, int argc, char *argv[]) {
 		for(i = 0; i < sizeof(pinPorts)/sizeof(pinPorts[0]); i++)
 			if(pinPorts[i].as_gpio)
 				chprintf(chp, "%s | ", pinPorts[i].pinNrString);
-		chprintf(chp,	 "\r\n"
+		chprintf(chp, "\r\n"
 				"\twith val: (only if direction out)\r\n"
 				"\t\t0 | 1\r\n");
 		return;
@@ -553,8 +570,7 @@ exit_with_usage:
 
 
 
-static void pulses_equidistant(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, bool startLow, unsigned pulseLen_ms)
-{
+static void pulses_equidistant(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, bool startLow, unsigned pulseLen_ms) {
 	unsigned i;
 	for(i = 0; i < count; ++i) {
 		if(startLow) {
@@ -570,22 +586,14 @@ static void pulses_equidistant(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, 
 	}
 }
 
-
-
-
-
 // function to calculate the time of pulse n during acceleration
-static float t_pulse(int n,float a) {
+static float t_pulse(int n, float a) {
 	float t;
 	t = sqrt(2. * n / a);
 	return t;
 }
 
-
-
-
-
-static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]){
+static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]) {
 	uint8_t i;
 	char *pin = NULL, *count = NULL;
 	char *velocity = NULL, *acceleration = NULL;
@@ -725,36 +733,6 @@ exit_with_usage:
 
 
 
-static void pulses_ramped(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, bool startLow, unsigned minPulseLen_ms, unsigned rampSteps)
-{
-	// min_delay determines the target speed
-	uint16_t rampLength = MIN(count/2, rampSteps);
-	uint8_t delay = minPulseLen_ms + rampSteps;
-	unsigned i;
-
-	for(i = 0; i < count; i++) {
-		if(startLow) {
-			palSetPad(gpio, pin);
-			chThdSleepMilliseconds(delay);
-		}
-		palClearPad(gpio, pin);
-		chThdSleepMilliseconds(delay);
-		if(!startLow) {
-			palSetPad(gpio, pin);
-			chThdSleepMilliseconds(delay);
-		}
-
-		if (i >= count - rampLength)
-			delay++;
-		else if (i < rampLength)
-			delay--;
-	}
-}
-
-
-
-
-
 
 /* Function for the rotary table/turntable */
 static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) {
@@ -884,7 +862,6 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 	}
 	return;
 
-
 exit_with_usage:
 	chprintf(chp, "Usage: motor_rotary <mode> <arguments>\r\n"
 			"\tNumber of pulses to turn "
@@ -900,6 +877,34 @@ exit_with_usage:
 			);
 }
 
+
+
+
+
+static void pulses_ramped(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, bool startLow, unsigned minPulseLen_ms, unsigned rampSteps) {
+	// min_delay determines the target speed
+	uint16_t rampLength = MIN(count/2, rampSteps);
+	uint8_t delay = minPulseLen_ms + rampSteps;
+	unsigned i;
+
+	for(i = 0; i < count; i++) {
+		if(startLow) {
+			palSetPad(gpio, pin);
+			chThdSleepMilliseconds(delay);
+		}
+		palClearPad(gpio, pin);
+		chThdSleepMilliseconds(delay);
+		if(!startLow) {
+			palSetPad(gpio, pin);
+			chThdSleepMilliseconds(delay);
+		}
+
+		if (i >= count - rampLength)
+			delay++;
+		else if (i < rampLength)
+			delay--;
+	}
+}
 
 static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) {
 	// Pin declaration for use with the C5-E (gpio number arbitrary)
@@ -1122,10 +1127,6 @@ static int scanSensors(void) {
 
 	return numSensors;
 }
-
-
-
-
 
 static float readSensorTimeout(BaseSequentialStream *chp, uint8_t sensorID, uint16_t timeout) {
 	// Locals
@@ -1478,8 +1479,7 @@ exit_with_usage:
 
 
 
-void get_unique_device_id96(uint8_t ptr96bit[96/8])
-{
+void get_unique_device_id96(uint8_t ptr96bit[96/8]) {
 	uint8_t * uid_register = (uint8_t*)0x1ffff7e8;
 	memcpy(ptr96bit, uid_register, 96/8);
 }
@@ -1508,8 +1508,7 @@ static void cmd_uniqueid(BaseSequentialStream *chp, int argc, char *argv[]) {
 
 static bool adc_conversion_ok;
 
-static void adc_bad_callback(ADCDriver *adcp, adcerror_t err)
-{
+static void adc_bad_callback(ADCDriver *adcp, adcerror_t err) {
 	(void)adcp;
 	(void)err;
 	adc_conversion_ok = false;
@@ -1641,6 +1640,10 @@ static const ShellConfig shell_cfg1 = {
 	(BaseSequentialStream *)&SDU1,
 	commands
 };
+
+
+
+
 
 /*===========================================================================*/
 /* Generic code.                                                             */
