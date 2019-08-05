@@ -15,6 +15,7 @@ Supported features
 * set PWM frequency
 * read temperature- and humidity-sensors on i2c bus (ADT7410 and SI7021-A20)
 * read ADC pins
+* control different linear and rotary motors (via mode [direction/home] and stepping pulses)
 
 Firmware
 --------
