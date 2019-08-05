@@ -864,11 +864,7 @@ static void cmd_motor_rotary(BaseSequentialStream *chp, int argc, char *argv[]) 
 
 exit_with_usage:
 	chprintf(chp, "Usage: motor_rotary <mode> <arguments>\r\n"
-			"\tNumber of pulses to turn "
-			"(1 pulse = 1,8 degrees the motor and 0,0375 degrees the rotary table)\r\n"
-			"\tNote: The given number of pulses is multiplied by 48 (gear reduction).\r\n"
-			"\t      -> 1 pulse as argument sends 48 pulses to the motor and "
-			"turns the rotary table by 1.8 degrees.\r\n"
+			"\tNumber of pulses to turn."
 			"\tModes:\r\n"
 			"\t 'home' - move to reference position to calibrate angle measurement\r\n"
 			"\t 'rotate' <pulses>\r\n"
@@ -1014,7 +1010,7 @@ static void cmd_motor_linear(BaseSequentialStream *chp, int argc, char *argv[]) 
 
 exit_with_usage:
 	chprintf(chp, "Usage: motor_linear  <mode> <arguments>\r\n"
-			"\tNumber of pulses to turn (1 pulse = 1,8 degrees the motor and 0,9424mm/pulse the linear unit)\r\n"
+			"\tNumber of pulses to turn\r\n"
 			"\tModes:\r\n"
 			"\t 'home' - move to reference position to calibrate distance measurement \r\n"
 			"\t 'move' <pulses> - linear movement according to the given pulses\r\n"
