@@ -744,11 +744,11 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]) {
 	return;
 
 exit_with_usage:
-	chprintf(chp, "Usage: send_pulses -p [pinID] -c [count] -v [velocity] -a [acceleration]\r\n"
-			"\tpinID: ID of the pin according to the MapleMini pinout\r\n"
-			"\tcount: the number of pulses send\r\n"
-			"\tvelocity: the (stationary) maximum velocity of the stepper motor [pulses/s]\r\n"
-			"\tacceleration: constant acceleration of the stepper motor [pulses/s^2]\r\n"
+	chprintf(chp, "Usage: send_pulses -p [pin] -c [count] -v [velocity] -a [acceleration]\r\n"
+			"\tpin            - pin to be used, according to the MapleMini pinout\r\n"
+			"\tcount          - the number of pulses send\r\n"
+			"\tvelocity       - the (stationary) maximum velocity of the stepper motor [pulses/s]\r\n"
+			"\tacceleration   - constant acceleration of the stepper motor [pulses/s^2]\r\n"
 			);
 }
 
@@ -880,10 +880,10 @@ exit_with_usage:
 	chprintf(chp, "Usage: motor_rotary <mode> <arguments>\r\n"
 			"\tNumber of pulses to turn."
 			"\tModes:\r\n"
-			"\t 'home' - move to reference position to calibrate angle measurement\r\n"
-			"\t 'rotate' <pulses>\r\n"
-			"\t\t <pulses> Option 1: +(number of pulses as int) - clockwise (CW) rotation\r\n"
-			"\t\t <pulses> Option 2: -(number of pulses as int) - counterclockwise (CCW) rotation\r\n"
+			"\t 'home'              - move to reference position to calibrate angle\r\n"
+			"\t 'rotate' <pulses>   - rotate motor according to given pulses\r\n"
+			"\t                       where positive pulses indicate clockwise (CW) movement,\r\n"
+			"\t                       and negative pulses counterclockwise (CCW).\r\n"
 			);
 }
 
@@ -1021,7 +1021,7 @@ exit_with_usage:
 	chprintf(chp, "Usage: motor_linear  <mode> <arguments>\r\n"
 			"\tNumber of pulses to turn\r\n"
 			"\tModes:\r\n"
-			"\t 'home'   - move to reference position to calibrate distance measurement \r\n"
+			"\t 'home'            - move to reference position to calibrate distance\r\n"
 			"\t 'move' <pulses>   - linear movement according to the given pulses\r\n"
 			"\t                     where positive pulses indicate movement toward motor,\r\n"
 			"\t                     and negative pulses toward the homing position.\r\n"
