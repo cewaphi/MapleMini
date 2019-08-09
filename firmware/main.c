@@ -609,11 +609,41 @@ static void pulses_equidistant(GPIO_TypeDef *gpio, uint8_t pin, unsigned count, 
 // FIXME: this is not very well documented. what exactly does it mean?
 static float t_pulse(int n, float a) {
 	float t;
+	// time stamp of pulse n (proportional to s at pulse n)
+	// it transforms from n = 0.5 * a * t^2
+	// where n is always a discrete value (denoting pulse "n")
+	// coresponding to a discrete point in time t
+	// estimated by the stated equation with the known (constant) acceleration a
 	t = sqrt(2. * n / a);
 	return t;
 }
 
 static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]) {
+	/* Function to send pulses with defined acceleration and velocity
+
+		 The basic idea is to relate the pulses send by the device
+	   with simple physical laws of dynamics.
+
+		 In particular these are denoted by
+		 a = const. (acceleration)
+		 v = a * dt = a * t | v_0 = 0 (velocity)
+		 s = v dt = a * t * dt = 0.5 * a * t^2 | v_0 = 0; s_0 = 0 (distance)
+		 In case of a stepper motor one pulse corresponds to a (fixed) incremental
+		 rotation of the motor. Depending on the application the motor rotation
+		 translates to either an incremental increase in distance or an incremental
+		 rotation.
+		 The physical laws can be applied without modification. The variable s can
+		 be simply replaced with n, a certain number of pulses.
+		 It should be denoted that when using pulses (as equivalent to distance)
+		 changes in the travelled distance are always incremental. Thus we imply
+		 that n always represented by a positive integer.
+		 The physical quantities s, v, and a will be given in units [pulses],
+		 [pulses / s] and [pulses / s^2] respectively.
+
+		 This implies that the user of this function has correlated pulses to
+		 change in distance/angle and provides the physical quantities with the
+		 units specified above.
+	*/
 	uint8_t i;
 	char *pin = NULL, *count = NULL;
 	char *velocity = NULL, *acceleration = NULL;
@@ -682,30 +712,50 @@ static void cmd_send_pulses(BaseSequentialStream *chp, int argc, char *argv[]) {
 	   rounded down to ensure that velocity stays below v stationary
 	   Note: if n_a round to 0 --> the velocity is reached in less than 1 pulse of acceleration
 	         as a result no acceleration takes place and v is applied immediately
+
+					 n_a is a discrete number of pulses that can be
+					 the known conversion factor can be represented by a distance s when the conversion
+					 factor is known.
 	*/
 	n_a = round(0.5 * a * t_a*t_a);
 	chprintf(chp, "number of pulses required till maximum velocity is reached: %d\r\n", n_a);
 
-  // FIXME: from an external position, the timing calculation is non trivial,
-	// documentation should be improved.
 	int j;
 	int pulse_j;
 	chprintf(chp, "Start sending pulses\r\n");
+	// The following implementation for incrementing pulses assumes that acceleration
+	// and deceleration are symmetrical. This means that the a_acceleration = - a_deceleration
+	// -> |a| = const., directions reversed to each other
+	// FIXME When using stepper motors then time sequences between two pulses can be in the range
+	//			 of [us]. This can become a limitation when the time for the calculations in the loop
+	//			 is in a similar order of magnitude with the sleeping time between two pulses.
+	//			 When due to this the stepper motor can not be accelerated any further, try
+	//			 performing the loop calculations beforehand. So that during the loop only sleep times
+	//			 need to be accessed from a list.
 	for(j = 0; j < atoi(count); j++) {
-		pulse_j = j+1;
+		pulse_j = j+1;	// there is no pulse 0 (since 0 initial distance means 0 pulses)
 		// In the following the time between the current enable and the following one is determined
 		// For the first half of steps
 		if (pulse_j <= (atoi(count)/2)) {
-			// acceleration interval
+			// acceleration interval as determined by s_incremental ~ n_a = v_target / a | a = const.
 			if (pulse_j <= n_a) {
+				// during acceleration with a=const., the time at which pulse j should be send can be
+				// estimated with the function t_pulse
+				// Assuming that the time for executing one pulse < time between two pulses:
+				// then the (sleep) time can be estimated by the time difference of two consecutive pulses
 				t_n = t_pulse((j+1), a) - t_pulse(j, a);
 			}
 			// constant motion at max. velocity
 			else {
+				// in case of a small number of pulses, small acceleration and large velocity
+				// the acceleration interval (till pulse number n_a) exceeds count/2
+				// in this case only ac- and deceleration takes place and no movement
+				// at constant velocity
 				t_n = 1 / v;
 			}
 		}
-		// for the second half of steps
+		// for the second half of steps (same calculations as for first half of the steps,
+		// but in reversed order)
 		else {
 			// deceleration interval (acceleration reversed)
 			if (pulse_j > (atoi(count) - n_a)) {
